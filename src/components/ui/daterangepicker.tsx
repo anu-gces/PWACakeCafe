@@ -1,13 +1,12 @@
-import * as React from "react";
+import { format, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { subDays, format } from "date-fns";
-import { DateRange } from "react-day-picker";
+import * as React from "react";
+import type { DateRange } from "react-day-picker";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 
 import { useEffect } from "react";

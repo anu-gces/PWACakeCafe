@@ -1,15 +1,10 @@
-import { Coffee, IceCream, Pizza, Soup, Beer, Star } from "lucide-react";
-import { Dock, DockIcon } from "../ui/dock";
-import {
-  TooltipProvider,
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import { Link } from "@tanstack/react-router";
+import { Beer, Coffee, IceCream, Pizza, Soup, Star } from "lucide-react";
+import { Dock, DockIcon } from "../ui/dock";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 type MenuDockProps = {
-  route: "restaurant" | "orders";
+  route: "editMenu" | "orders";
 };
 
 export function MenuDock({ route }: MenuDockProps) {
@@ -31,16 +26,16 @@ export function MenuDock({ route }: MenuDockProps) {
   ] as const;
 
   return (
-    <Dock className="fixed bottom-4 left-1/2 -translate-x-1/2">
+    <Dock className="bottom-4 left-1/2 fixed -translate-x-1/2">
       {dockItems.map((item, index) => (
-        <DockIcon key={index} className="p-0 m-0 flex">
+        <DockIcon key={index} className="flex m-0 p-0">
           <TooltipProvider delayDuration={200} skipDelayDuration={100}>
             <Tooltip>
-              <TooltipTrigger className="focus:outline-none focus-visible:ring-2 p-0 m-0 focus-visible:ring-white rounded-full h-full w-full ">
+              <TooltipTrigger className="m-0 p-0 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white w-full h-full">
                 <Link
                   to={`/home/${route}`}
                   search={{ category: item.category }}
-                  className=" flex p-2  h-full w-full rounded-full"
+                  className="flex p-2 rounded-full w-full h-full"
                 >
                   {item.icon}
                 </Link>

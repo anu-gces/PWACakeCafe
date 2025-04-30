@@ -1,13 +1,19 @@
-import { ArrowLeftCircle, Plus, Save, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Route as RestaurantRoute } from "@/routes/home/editMenu";
+import { ArrowLeftCircle, Plus, Save, Trash2 } from "lucide-react";
 import { AnimatePresence, motion, useAnimation } from "motion/react";
+import { useEffect, useState } from "react";
 
-import { MenuCard } from "./menuCard";
-import { MenuDock } from "./menuDock";
-import { Formik, Form } from "formik";
+import { Form, Formik } from "formik";
 import * as Yup from "yup";
+import { MenuCard } from "./menuCard";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { uploadMenuItemImage } from "@/firebase/firebase_storage";
+import { editFoodItem, enterFoodItem, getFoodItems } from "@/firebase/firestore";
+import { cn, useLoadingSpinner } from "@/lib/utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogClose,
@@ -18,15 +24,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn, useLoadingSpinner } from "@/lib/utils";
-import { uploadMenuItemImage } from "@/firebase/firebase_storage";
-import { deleteFoodItem, editFoodItem, enterFoodItem, getFoodItems } from "@/firebase/firestore";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { Label } from "../ui/label";
 
 export type FoodItemProps = {
   foodId: string;
@@ -54,11 +53,11 @@ export function Restaurant() {
 
   const controls = useAnimation();
 
-  const { data, isLoading, error } = useQuery<FoodItemProps[]>({
+  const { data, isLoading } = useQuery<FoodItemProps[]>({
     queryKey: ["foods"],
     queryFn: getFoodItems,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   const queryClient = useQueryClient();
@@ -128,18 +127,18 @@ export function Restaurant() {
     },
   });
 
-  const deleteFoodItemsMutation = useMutation({
-    mutationFn: async () => {
-      await deleteFoodItem(foods);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["foods"] });
-      toast("Food Item(s) removed successfully!");
-    },
-    onError: (error: any) => {
-      toast("Error!", error);
-    },
-  });
+  // const deleteFoodItemsMutation = useMutation({
+  // 	mutationFn: async () => {
+  // 		await deleteFoodItem(foods);
+  // 	},
+  // 	onSuccess: () => {
+  // 		queryClient.invalidateQueries({ queryKey: ["foods"] });
+  // 		toast("Food Item(s) removed successfully!");
+  // 	},
+  // 	onError: (error: any) => {
+  // 		toast("Error!", error);
+  // 	},
+  // });
 
   useLoadingSpinner(isLoading);
 
@@ -312,7 +311,7 @@ export function Restaurant() {
             onClick={() => {
               controls.stop();
               controls.start("reset");
-              deleteFoodItemsMutation.mutate();
+              // deleteFoodItemsMutation.mutate();
               setIsDeleting(false);
             }}
             className={cn(
@@ -551,7 +550,7 @@ export function Restaurant() {
           ))}
       </div>
 
-      <MenuDock route={"restaurant"} />
+      {/* <MenuDock route={"restaurant"} /> */}
     </div>
   );
 }

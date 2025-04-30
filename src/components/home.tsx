@@ -1,35 +1,34 @@
 import {
+  BellIcon,
   Cake,
   CalendarPlus,
   CircleUserRound,
+  CookingPotIcon,
+  HammerIcon,
   Info,
-  PackageOpen,
   LogOut,
   NotepadText,
+  PackageOpen,
   Settings2,
   Users,
-  CookingPotIcon,
-  WifiOff,
-  Wifi,
-  BellIcon,
   UtensilsCrossedIcon,
-  HammerIcon,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
-import FoodClocheIcon from "@/assets/foodClocheIcon";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Outlet, useNavigate, useLocation } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ModeToggle } from "./ui/themeToggle";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { doSignOut } from "@/firebase/auth";
 import { getCurrentUserDocumentDetails } from "@/firebase/firestore";
+import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Skeleton } from "./ui/skeleton";
+import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Skeleton } from "./ui/skeleton";
+import { ModeToggle } from "./ui/themeToggle";
 
 export function Home() {
   const location = useLocation();
@@ -52,8 +51,8 @@ export function Home() {
   } = useQuery({
     queryKey: ["user"],
     queryFn: getCurrentUserDocumentDetails,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   const logoutMutation = useMutation({
@@ -132,7 +131,7 @@ export function Home() {
                   })}
                   onClick={() => {
                     navigate({
-                      to: `/home/restaurant`,
+                      to: `/home/editMenu`,
                       search: { category: "appetizers" },
                     });
                   }}

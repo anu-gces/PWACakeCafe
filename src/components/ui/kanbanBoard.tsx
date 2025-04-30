@@ -1,386 +1,425 @@
-import { Dispatch, SetStateAction, useState, DragEvent, FormEvent, useEffect } from "react";
-import { motion } from "motion/react";
-import { Trash2, Plus, GripVertical, SaveIcon, Loader } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	enterKanbanCardDocument,
+	getKanbanCardDocument,
+} from "@/firebase/firestore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { enterKanbanCardDocument, getKanbanCardDocument } from "@/firebase/firestore";
+import { GripVertical, Loader, Plus, SaveIcon, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
+import {
+	type Dispatch,
+	type DragEvent,
+	type FormEvent,
+	type SetStateAction,
+	useEffect,
+	useState,
+} from "react";
 import { toast } from "sonner";
 
 type ColumnType = "inStock" | "runningLow" | "outOfStock" | "restocked";
 
 type CardType = {
-  title: string;
-  id: string;
-  column: ColumnType;
+	title: string;
+	id: string;
+	column: ColumnType;
 };
 
 export function KanbanBoard() {
-  const {
-    data: kanbanCards,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["kanbanCards"],
-    queryFn: getKanbanCardDocument,
-    staleTime: Infinity,
-    gcTime: Infinity,
-  });
+	const {
+		data: kanbanCards,
+		isLoading,
+		error,
+	} = useQuery({
+		queryKey: ["kanbanCards"],
+		queryFn: getKanbanCardDocument,
+		staleTime: Number.POSITIVE_INFINITY,
+		gcTime: Number.POSITIVE_INFINITY,
+	});
 
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  const [cards, setCards] = useState<CardType[]>([]);
+	const [cards, setCards] = useState<CardType[]>([]);
 
-  useEffect(() => {
-    if (kanbanCards) {
-      setCards(kanbanCards);
-    }
-  }, [kanbanCards]);
+	useEffect(() => {
+		if (kanbanCards) {
+			setCards(kanbanCards);
+		}
+	}, [kanbanCards]);
 
-  const enterKanbanCardMutation = useMutation({
-    mutationFn: enterKanbanCardDocument,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["kanbanCards"] });
-      toast("Kanban card entered successfully!");
-    },
-  });
+	const enterKanbanCardMutation = useMutation({
+		mutationFn: enterKanbanCardDocument,
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["kanbanCards"] });
+			toast("Kanban card entered successfully!");
+		},
+	});
 
-  const saveCards = () => {
-    // Save cards to firestore
-    enterKanbanCardMutation.mutate(cards);
-  };
+	const saveCards = () => {
+		// Save cards to firestore
+		enterKanbanCardMutation.mutate(cards);
+	};
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center w-full h-full">
-        <Loader className="animate-spin" size={24} />
-      </div>
-    );
-  }
+	if (isLoading) {
+		return (
+			<div className="flex justify-center items-center w-full h-full">
+				<Loader className="animate-spin" size={24} />
+			</div>
+		);
+	}
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center w-full h-full">
-        Error: {error.message}
-        <br />
-        Press F5 to Refresh!
-      </div>
-    );
-  }
+	if (error) {
+		return (
+			<div className="flex justify-center items-center w-full h-full">
+				Error: {error.message}
+				<br />
+				Press F5 to Refresh!
+			</div>
+		);
+	}
 
-  return (
-    <div className="flex gap-3 bg-muted dark:bg-background shadow-sm p-2 border rounded-lg w-full h-full overflow-auto text-card-foreground">
-      <KanbanColumn title="In Stock" column="inStock" headingColor="text-blue-500" cards={cards} setCards={setCards} />
-      <KanbanColumn
-        title="Running Low"
-        column="runningLow"
-        headingColor="text-yellow-500"
-        cards={cards}
-        setCards={setCards}
-      />
-      <KanbanColumn
-        title="Out of Stock"
-        column="outOfStock"
-        headingColor="text-red-600"
-        cards={cards}
-        setCards={setCards}
-      />
-      <KanbanColumn
-        title="Restocked"
-        column="restocked"
-        headingColor="text-emerald-400"
-        cards={cards}
-        setCards={setCards}
-      />
+	return (
+		<div className="flex gap-3 bg-muted dark:bg-background shadow-sm p-2 border rounded-lg w-full h-full overflow-auto text-card-foreground">
+			<KanbanColumn
+				title="In Stock"
+				column="inStock"
+				headingColor="text-blue-500"
+				cards={cards}
+				setCards={setCards}
+			/>
+			<KanbanColumn
+				title="Running Low"
+				column="runningLow"
+				headingColor="text-yellow-500"
+				cards={cards}
+				setCards={setCards}
+			/>
+			<KanbanColumn
+				title="Out of Stock"
+				column="outOfStock"
+				headingColor="text-red-600"
+				cards={cards}
+				setCards={setCards}
+			/>
+			<KanbanColumn
+				title="Restocked"
+				column="restocked"
+				headingColor="text-emerald-400"
+				cards={cards}
+				setCards={setCards}
+			/>
 
-      <div className="flex flex-col gap-6 bg-muted dark:bg-background shadow-sm rounded-lg w-full h-full overflow-hidden text-card-foreground">
-        <Button
-          className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-background text-sm transition-opacity duration-500"
-          onClick={saveCards} // Save cards when button is clicked
-        >
-          <SaveIcon color="#ffffff" />
-          Save
-        </Button>
+			<div className="flex flex-col gap-6 bg-muted dark:bg-background shadow-sm rounded-lg w-full h-full overflow-hidden text-card-foreground">
+				<Button
+					className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-background text-sm transition-opacity duration-500"
+					onClick={saveCards} // Save cards when button is clicked
+				>
+					<SaveIcon color="#ffffff" />
+					Save
+				</Button>
 
-        <KanbanDelete setCards={setCards} />
-      </div>
-    </div>
-  );
+				<KanbanDelete setCards={setCards} />
+			</div>
+		</div>
+	);
 }
 
 type KanbanColumnProps = {
-  title: string;
-  headingColor: string;
-  cards: CardType[];
-  column: ColumnType;
-  setCards: Dispatch<SetStateAction<CardType[]>>;
+	title: string;
+	headingColor: string;
+	cards: CardType[];
+	column: ColumnType;
+	setCards: Dispatch<SetStateAction<CardType[]>>;
 };
 
-const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanColumnProps) => {
-  const [active, setActive] = useState(false);
+const KanbanColumn = ({
+	title,
+	headingColor,
+	cards,
+	column,
+	setCards,
+}: KanbanColumnProps) => {
+	const [active, setActive] = useState(false);
 
-  const handleDragStart = (e: DragEvent, card: CardType) => {
-    e.dataTransfer.setData("cardId", card.id);
-  };
+	const handleDragStart = (e: DragEvent, card: CardType) => {
+		e.dataTransfer.setData("cardId", card.id);
+	};
 
-  const handleDragEnd = (e: DragEvent) => {
-    const cardId = e.dataTransfer.getData("cardId");
+	const handleDragEnd = (e: DragEvent) => {
+		const cardId = e.dataTransfer.getData("cardId");
 
-    setActive(false);
-    clearHighlights();
+		setActive(false);
+		clearHighlights();
 
-    const indicators = getIndicators();
-    const { element } = getNearestIndicator(e, indicators);
+		const indicators = getIndicators();
+		const { element } = getNearestIndicator(e, indicators);
 
-    const before = element.dataset.before || "-1";
+		const before = element.dataset.before || "-1";
 
-    if (before !== cardId) {
-      let copy = [...cards];
+		if (before !== cardId) {
+			let copy = [...cards];
 
-      let cardToTransfer = copy.find((c) => c.id === cardId);
-      if (!cardToTransfer) return;
-      cardToTransfer = { ...cardToTransfer, column };
+			let cardToTransfer = copy.find((c) => c.id === cardId);
+			if (!cardToTransfer) return;
+			cardToTransfer = { ...cardToTransfer, column };
 
-      copy = copy.filter((c) => c.id !== cardId);
+			copy = copy.filter((c) => c.id !== cardId);
 
-      const moveToBack = before === "-1";
+			const moveToBack = before === "-1";
 
-      if (moveToBack) {
-        copy.push(cardToTransfer);
-      } else {
-        const insertAtIndex = copy.findIndex((el) => el.id === before);
-        if (insertAtIndex === undefined) return;
+			if (moveToBack) {
+				copy.push(cardToTransfer);
+			} else {
+				const insertAtIndex = copy.findIndex((el) => el.id === before);
+				if (insertAtIndex === undefined) return;
 
-        copy.splice(insertAtIndex, 0, cardToTransfer);
-      }
+				copy.splice(insertAtIndex, 0, cardToTransfer);
+			}
 
-      setCards(copy);
-    }
-  };
+			setCards(copy);
+		}
+	};
 
-  const handleDragOver = (e: DragEvent) => {
-    e.preventDefault();
-    highlightIndicator(e);
+	const handleDragOver = (e: DragEvent) => {
+		e.preventDefault();
+		highlightIndicator(e);
 
-    setActive(true);
-  };
+		setActive(true);
+	};
 
-  const clearHighlights = (els?: HTMLElement[]) => {
-    const indicators = els || getIndicators();
+	const clearHighlights = (els?: HTMLElement[]) => {
+		const indicators = els || getIndicators();
 
-    indicators.forEach((i) => {
-      i.style.opacity = "0";
-    });
-  };
+		indicators.forEach((i) => {
+			i.style.opacity = "0";
+		});
+	};
 
-  const highlightIndicator = (e: DragEvent) => {
-    const indicators = getIndicators();
+	const highlightIndicator = (e: DragEvent) => {
+		const indicators = getIndicators();
 
-    clearHighlights(indicators);
+		clearHighlights(indicators);
 
-    const el = getNearestIndicator(e, indicators);
+		const el = getNearestIndicator(e, indicators);
 
-    el.element.style.opacity = "1";
-  };
+		el.element.style.opacity = "1";
+	};
 
-  const getNearestIndicator = (e: DragEvent, indicators: HTMLElement[]) => {
-    const DISTANCE_OFFSET = 50;
+	const getNearestIndicator = (e: DragEvent, indicators: HTMLElement[]) => {
+		const DISTANCE_OFFSET = 50;
 
-    const el = indicators.reduce(
-      (closest, child) => {
-        const box = child.getBoundingClientRect();
+		const el = indicators.reduce(
+			(closest, child) => {
+				const box = child.getBoundingClientRect();
 
-        const offset = e.clientY - (box.top + DISTANCE_OFFSET);
+				const offset = e.clientY - (box.top + DISTANCE_OFFSET);
 
-        if (offset < 0 && offset > closest.offset) {
-          return { offset: offset, element: child };
-        } else {
-          return closest;
-        }
-      },
-      {
-        offset: Number.NEGATIVE_INFINITY,
-        element: indicators[indicators.length - 1],
-      }
-    );
+				if (offset < 0 && offset > closest.offset) {
+					return { offset: offset, element: child };
+				} else {
+					return closest;
+				}
+			},
+			{
+				offset: Number.NEGATIVE_INFINITY,
+				element: indicators[indicators.length - 1],
+			},
+		);
 
-    return el;
-  };
+		return el;
+	};
 
-  const getIndicators = () => {
-    return Array.from(document.querySelectorAll(`[data-column="${column}"]`) as unknown as HTMLElement[]);
-  };
+	const getIndicators = () => {
+		return Array.from(
+			document.querySelectorAll(
+				`[data-column="${column}"]`,
+			) as unknown as HTMLElement[],
+		);
+	};
 
-  const handleDragLeave = () => {
-    clearHighlights();
-    setActive(false);
-  };
+	const handleDragLeave = () => {
+		clearHighlights();
+		setActive(false);
+	};
 
-  const filteredCards = cards.filter((c) => c.column === column);
+	const filteredCards = cards.filter((c) => c.column === column);
 
-  return (
-    <div className="flex flex-col w-full h-full">
-      <div className="flex justify-between items-center mb-3 p-2 px-3 border-b-2">
-        <h3 className={`font-medium ${headingColor}`}>{title}</h3>
-        <span className="rounded text-neutral-400 text-sm">{filteredCards.length}</span>
-      </div>
-      <div
-        onDrop={handleDragEnd}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        className={`h-full w-full p-2 transition-colors rounded ${active ? "bg-input/100" : "bg-black/0"}`}
-      >
-        <KanbanAddCard column={column} setCards={setCards} />
+	return (
+		<div className="flex flex-col w-full h-full">
+			<div className="flex justify-between items-center mb-3 p-2 px-3 border-b-2">
+				<h3 className={`font-medium ${headingColor}`}>{title}</h3>
+				<span className="rounded text-neutral-400 text-sm">
+					{filteredCards.length}
+				</span>
+			</div>
+			<div
+				onDrop={handleDragEnd}
+				onDragOver={handleDragOver}
+				onDragLeave={handleDragLeave}
+				className={`h-full w-full p-2 transition-colors rounded ${active ? "bg-input/100" : "bg-black/0"}`}
+			>
+				<KanbanAddCard column={column} setCards={setCards} />
 
-        {filteredCards.map((c) => {
-          return <KanbanCard key={c.id} {...c} handleDragStart={handleDragStart} />;
-        })}
-        <KanbanDropIndicator beforeId={null} column={column} />
-      </div>
-    </div>
-  );
+				{filteredCards.map((c) => {
+					return (
+						<KanbanCard key={c.id} {...c} handleDragStart={handleDragStart} />
+					);
+				})}
+				<KanbanDropIndicator beforeId={null} column={column} />
+			</div>
+		</div>
+	);
 };
 
 type CardProps = CardType & {
-  handleDragStart: Function;
+	handleDragStart: Function;
 };
 
 const KanbanCard = ({ title, id, column, handleDragStart }: CardProps) => {
-  return (
-    <>
-      <KanbanDropIndicator beforeId={id} column={column} />
-      <motion.div
-        layout
-        layoutId={id}
-        draggable="true"
-        onDragStart={(e) => handleDragStart(e, { title, id, column })}
-        className="flex flex-row gap-2 bg-card shadow-sm p-2 border rounded-lg text-card-foreground cursor-grab active:cursor-grabbing"
-      >
-        <GripVertical color="#737373" size={24} />
-        <p>{title}</p>
-      </motion.div>
-    </>
-  );
+	return (
+		<>
+			<KanbanDropIndicator beforeId={id} column={column} />
+			<motion.div
+				layout
+				layoutId={id}
+				draggable="true"
+				onDragStart={(e) => handleDragStart(e, { title, id, column })}
+				className="flex flex-row gap-2 bg-card shadow-sm p-2 border rounded-lg text-card-foreground cursor-grab active:cursor-grabbing"
+			>
+				<GripVertical color="#737373" size={24} />
+				<p>{title}</p>
+			</motion.div>
+		</>
+	);
 };
 
 type KanbanDropIndicatorProps = {
-  beforeId: string | null;
-  column: string;
+	beforeId: string | null;
+	column: string;
 };
 
-const KanbanDropIndicator = ({ beforeId, column }: KanbanDropIndicatorProps) => {
-  return (
-    <div data-before={beforeId || "-1"} data-column={column} className="bg-primary opacity-0 my-0.5 w-full h-0.5" />
-  );
+const KanbanDropIndicator = ({
+	beforeId,
+	column,
+}: KanbanDropIndicatorProps) => {
+	return (
+		<div
+			data-before={beforeId || "-1"}
+			data-column={column}
+			className="bg-primary opacity-0 my-0.5 w-full h-0.5"
+		/>
+	);
 };
 
-const KanbanDelete = ({ setCards }: { setCards: Dispatch<SetStateAction<CardType[]>> }) => {
-  const [active, setActive] = useState(false);
+const KanbanDelete = ({
+	setCards,
+}: { setCards: Dispatch<SetStateAction<CardType[]>> }) => {
+	const [active, setActive] = useState(false);
 
-  const handleDragOver = (e: DragEvent) => {
-    e.preventDefault();
-    setActive(true);
-  };
+	const handleDragOver = (e: DragEvent) => {
+		e.preventDefault();
+		setActive(true);
+	};
 
-  const handleDragLeave = () => {
-    setActive(false);
-  };
+	const handleDragLeave = () => {
+		setActive(false);
+	};
 
-  const handleDragEnd = (e: DragEvent) => {
-    const cardId = e.dataTransfer.getData("cardId");
+	const handleDragEnd = (e: DragEvent) => {
+		const cardId = e.dataTransfer.getData("cardId");
 
-    setCards((pv) => pv.filter((c) => c.id !== cardId));
+		setCards((pv) => pv.filter((c) => c.id !== cardId));
 
-    setActive(false);
-  };
+		setActive(false);
+	};
 
-  return (
-    <div
-      onDrop={handleDragEnd}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      className={`grid h-full place-content-center rounded border text-3xl ${
-        active ? "border-red-500/50 bg-red-500/50" : " bg-background "
-      }`}
-    >
-      {active ? <Trash2 className="animate-ping" /> : <Trash2 />}
-    </div>
-  );
+	return (
+		<div
+			onDrop={handleDragEnd}
+			onDragOver={handleDragOver}
+			onDragLeave={handleDragLeave}
+			className={`grid h-full place-content-center rounded border text-3xl ${
+				active ? "border-red-500/50 bg-red-500/50" : " bg-background "
+			}`}
+		>
+			{active ? <Trash2 className="animate-ping" /> : <Trash2 />}
+		</div>
+	);
 };
 
 type KanbanAddCardProps = {
-  column: ColumnType;
-  setCards: Dispatch<SetStateAction<CardType[]>>;
+	column: ColumnType;
+	setCards: Dispatch<SetStateAction<CardType[]>>;
 };
 
 const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
-  const [text, setText] = useState("");
-  const [adding, setAdding] = useState(false);
+	const [text, setText] = useState("");
+	const [adding, setAdding] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
 
-    if (!text.trim().length) return;
+		if (!text.trim().length) return;
 
-    const newCard = {
-      column,
-      title: text.trim(),
-      id: Math.random().toString(),
-    };
+		const newCard = {
+			column,
+			title: text.trim(),
+			id: Math.random().toString(),
+		};
 
-    setCards((pv) => [...pv, newCard]);
+		setCards((pv) => [...pv, newCard]);
 
-    setAdding(false);
-  };
+		setAdding(false);
+	};
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleSubmit(e as any);
-    } else if (e.key === "Escape") {
-      setAdding(false);
-    }
-  };
+	const handleKeyDown = (e: React.KeyboardEvent) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			handleSubmit(e as any);
+		} else if (e.key === "Escape") {
+			setAdding(false);
+		}
+	};
 
-  return (
-    <>
-      {adding ? (
-        <motion.form layout onSubmit={handleSubmit}>
-          <Textarea
-            onKeyDown={handleKeyDown}
-            onChange={(e) => setText(e.target.value)}
-            autoFocus
-            placeholder="Add new item..."
-            className="rounded w-full"
-          />
-          <div className="flex justify-end">
-            <div className="flex justify-end items-center gap-1.5 bg-gray-100 dark:bg-stone-900 mt-1.5 p-1 border border-gray-100 dark:border-0 rounded-lg">
-              <button
-                onClick={() => setAdding(false)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm transition-opacity duration-500"
-              >
-                Close
-              </button>
-              <button
-                type="submit"
-                className="inline-flex relative justify-center items-center bg-white hover:bg-muted-background dark:bg-background shadow-sm px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary min-w-24 text-primary hover:text-red-400 dark:text-white text-sm"
-              >
-                <Plus />
-                <span>Add</span>
-              </button>
-            </div>
-          </div>
-        </motion.form>
-      ) : (
-        <motion.button
-          layout
-          onClick={() => setAdding(true)}
-          className="flex items-center gap-1.5 bg-background hover:bg-accent disabled:opacity-50 px-0.5 py-1.5 border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background focus-visible:ring-offset-2 w-full font-medium text-xs whitespace-nowrap transition-colors text-accent-foreground hover:text-accent-foreground disabled:pointer-events-none"
-        >
-          <Plus />
-          <span>Add card</span>
-        </motion.button>
-      )}
-    </>
-  );
+	return (
+		<>
+			{adding ? (
+				<motion.form layout onSubmit={handleSubmit}>
+					<Textarea
+						onKeyDown={handleKeyDown}
+						onChange={(e) => setText(e.target.value)}
+						autoFocus
+						placeholder="Add new item..."
+						className="rounded w-full"
+					/>
+					<div className="flex justify-end">
+						<div className="flex justify-end items-center gap-1.5 bg-gray-100 dark:bg-stone-900 mt-1.5 p-1 border border-gray-100 dark:border-0 rounded-lg">
+							<button
+								onClick={() => setAdding(false)}
+								className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm transition-opacity duration-500"
+							>
+								Close
+							</button>
+							<button
+								type="submit"
+								className="inline-flex relative justify-center items-center bg-white hover:bg-muted-background dark:bg-background shadow-sm px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary min-w-24 text-primary hover:text-red-400 dark:text-white text-sm"
+							>
+								<Plus />
+								<span>Add</span>
+							</button>
+						</div>
+					</div>
+				</motion.form>
+			) : (
+				<motion.button
+					layout
+					onClick={() => setAdding(true)}
+					className="flex items-center gap-1.5 bg-background hover:bg-accent disabled:opacity-50 px-0.5 py-1.5 border border-input rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ring-offset-background focus-visible:ring-offset-2 w-full font-medium text-xs whitespace-nowrap transition-colors text-accent-foreground hover:text-accent-foreground disabled:pointer-events-none"
+				>
+					<Plus />
+					<span>Add card</span>
+				</motion.button>
+			)}
+		</>
+	);
 };

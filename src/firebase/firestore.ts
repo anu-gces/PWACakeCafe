@@ -1,26 +1,26 @@
+import type { calendarEventProps } from "@/components/calendar";
+import type { OrderProps } from "@/components/restaurant/orders";
+import type { FoodItemProps } from "@/components/restaurant/restaurant";
+// import { FirebaseError } from "firebase/app";
+import { type User, getAuth, onAuthStateChanged } from "firebase/auth";
 import {
-  initializeFirestore,
-  persistentLocalCache,
-  persistentMultipleTabManager,
+  type DocumentData,
+  collection,
   doc,
-  setDoc,
   getDoc,
   getDocs,
-  updateDoc,
-  DocumentData,
-  collection,
-  query,
-  orderBy,
+  initializeFirestore,
   limit,
+  orderBy,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  query,
+  setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { app } from "./firebase";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
-import { calendarEventProps } from "@/components/calendar";
-import { FoodItemProps } from "@/components/restaurant/restaurant";
 import { deleteMenuItemImage } from "./firebase_storage";
-import { OrderProps } from "@/components/restaurant/orders";
-import { FirebaseError } from "firebase/app";
 
 //export const db = getFirestore(app);
 
@@ -252,7 +252,7 @@ export async function editFoodItem(foodItem: FoodItemProps) {
       return; // End the function if docSnap does not exist
     }
 
-    let foodItems: (FoodItemProps & { uid: string })[] = docSnap.data().foodItems || [];
+    const foodItems: (FoodItemProps & { uid: string })[] = docSnap.data().foodItems || [];
 
     // Find the index of the food item with the matching id
     const index = foodItems.findIndex((item) => item.foodId === foodItem.foodId);

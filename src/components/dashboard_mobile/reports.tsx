@@ -1,29 +1,16 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { DataTable } from "../ui/dataTable";
-import { ColumnDef } from "@tanstack/react-table";
-import { OrderProps } from "../restaurant/orders";
-import { useSearch } from "@tanstack/react-router";
-import { useEffect } from "react";
-import {
-  dashboardQueryOptions,
-  Route as dashboardRoute,
-} from "@/routes/home/dashboard";
 import { useLoadingSpinner } from "@/lib/utils";
-import { getOrdersInRange } from "@/firebase/firestore";
+import { dashboardQueryOptions } from "@/routes/home/dashboard";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useEffect } from "react";
+import type { OrderProps } from "../restaurant/orders";
+import { DataTable } from "../ui/dataTable";
 
 export function Reports() {
   const search = useSearch({ from: "/home/dashboard" });
   const queryClient = useQueryClient();
-  const {
-    data: getOrdersInRangeQuery,
-    isLoading,
-    isError,
-  } = useSuspenseQuery(
+  const { data: getOrdersInRangeQuery, isLoading } = useSuspenseQuery(
     dashboardQueryOptions({ from: search.from!, to: search.to! })
   );
 
@@ -102,11 +89,5 @@ export function Reports() {
     },
   ];
 
-  return (
-    <DataTable
-      columns={columns}
-      data={getOrdersInRangeQuery || []}
-      filterColumnId="processedBy"
-    />
-  );
+  return <DataTable columns={columns} data={getOrdersInRangeQuery || []} filterColumnId="processedBy" />;
 }

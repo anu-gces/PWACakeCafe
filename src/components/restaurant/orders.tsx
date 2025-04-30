@@ -1,23 +1,23 @@
-import { Loader, Printer, RotateCcw, SaveIcon } from "lucide-react";
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
-import { Route as OrdersRoute } from "@/routes/home/orders";
-import { AnimatePresence, motion, useAnimation } from "motion/react";
-import { MenuCardDummy } from "./menuCard";
-import { MenuDock } from "./menuDock";
-import { createOrderHistoryEntry, getFoodItems } from "@/firebase/firestore";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Button } from "../ui/button";
+import CakeCafeLogo from "@/assets/Logo.png";
 import DonutImage from "@/assets/donutImage";
 import FoodClocheIcon from "@/assets/foodClocheIcon";
-import CakeCafeLogo from "@/assets/Logo.png";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { createOrderHistoryEntry, getFoodItems } from "@/firebase/firestore";
+import { cn, useLoadingSpinner } from "@/lib/utils";
+import { Route as OrdersRoute } from "@/routes/home/orders";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { RotateCcw, SaveIcon } from "lucide-react";
+import { AnimatePresence, motion, useAnimation } from "motion/react";
+import { type Dispatch, type SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { ScrollArea } from "../ui/scroll-area";
-import { cn, useLoadingSpinner } from "@/lib/utils";
-import { toast } from "sonner";
+import { MenuCardDummy } from "./menuCard";
+import { MenuDock } from "./menuDock";
 
 export type FoodItemProps = {
   foodId: string;
@@ -39,7 +39,6 @@ export function Orders() {
 
   const [foods, setFoods] = useState<FoodItemProps[]>([]);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const queryClient = useQueryClient();
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   const controls = useAnimation();
@@ -54,11 +53,11 @@ export function Orders() {
     // console.log(animationRefs.current);
   };
 
-  const { data, isLoading, error } = useQuery<FoodItemProps[]>({
+  const { data, isLoading } = useQuery<FoodItemProps[]>({
     queryKey: ["foods"],
     queryFn: getFoodItems,
-    staleTime: Infinity,
-    gcTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
   });
 
   useLoadingSpinner(isLoading);
@@ -193,8 +192,6 @@ export function Invoice({ addToCart, setAddToCart, open, setOpen }: InvoiceProps
   const [receiptNumber, setReceiptNumber] = useState("Click to Generate");
   const [receiptError, setReceiptError] = useState(false);
 
-  const [orderProps, setOrderProps] = useState<OrderProps | null>(null);
-
   function generateReceiptNumber() {
     if (receiptNumber === "Click to Generate") {
       setReceiptNumber(
@@ -268,7 +265,7 @@ export function Invoice({ addToCart, setAddToCart, open, setOpen }: InvoiceProps
   const discount = subtotal * ((discountRate === "" ? 0 : discountRate) / 100);
   const tax = subtotal * (taxRate === "" ? 13 : taxRate / 100);
   const [isPrinting, setIsPrinting] = useState(false);
-  let invoiceRef = useRef<HTMLDivElement>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

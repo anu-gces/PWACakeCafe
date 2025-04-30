@@ -1,301 +1,337 @@
-import { motion, useMotionValue } from "motion/react";
 import DonutImage from "@/assets/donutImage";
-import { PencilIcon, Trash2Icon } from "lucide-react";
-import { FoodItemProps } from "./editMenu";
-import { Button } from "../ui/button";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
+	Drawer,
+	DrawerClose,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+	DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { PencilIcon, Trash2Icon } from "lucide-react";
+import { motion, useMotionValue } from "motion/react";
+import { Button } from "../ui/button";
+import type { FoodItemProps } from "./editMenu";
 
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadMenuItemImage } from "@/firebase/firebase_storage";
 import { deleteFoodItem, editFoodItem } from "@/firebase/firestore";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
-import { validationSchema } from "./editMenu";
-import { Label } from "../ui/label";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { validationSchema } from "./editMenu";
 
 type MenuCardProps = {
-  food: FoodItemProps;
+	food: FoodItemProps;
 };
 
 export function MenuCard({ food }: MenuCardProps) {
-  const x = useMotionValue(0);
-  return (
-    <>
-      <div className="relative">
-        <div className="top-0 right-0 z-0 absolute flex items-center pr-4 h-full">
-          <EditDrawer food={food} />
-          <DeleteDrawer food={food} />
-        </div>
-        <motion.div
-          drag="x"
-          dragDirectionLock
-          dragConstraints={{ left: -100, right: 0 }}
-          dragTransition={{ bounceStiffness: 500, bounceDamping: 15 }}
-          style={{ x }}
-          dragElastic={0.2}
-          className="z-10 relative"
-        >
-          <div className="relative flex items-center gap-2 bg-background active:bg-gray-200 dark:active:bg-muted p-0 border-1 transition-colors duration-200">
-            {typeof food.foodPhoto === "string" ? (
-              <img alt={food.foodName} src={food.foodPhoto} className="flex-shrink-0 w-20 h-20 object-cover" />
-            ) : (
-              <div className="flex justify-center items-center w-20 h-20">
-                <DonutImage />
-              </div>
-            )}
+	const x = useMotionValue(0);
+	return (
+		<>
+			<div className="relative">
+				<div className="top-0 right-0 z-0 absolute flex items-center pr-4 h-full">
+					<EditDrawer food={food} />
+					<DeleteDrawer food={food} />
+				</div>
+				<motion.div
+					drag="x"
+					dragDirectionLock
+					dragConstraints={{ left: -100, right: 0 }}
+					dragTransition={{ bounceStiffness: 500, bounceDamping: 15 }}
+					style={{ x }}
+					dragElastic={0.2}
+					className="z-10 relative"
+				>
+					<div className="relative flex items-center gap-2 bg-background active:bg-gray-200 dark:active:bg-muted p-0 border-1 transition-colors duration-200">
+						{typeof food.foodPhoto === "string" ? (
+							<img
+								alt={food.foodName}
+								src={food.foodPhoto}
+								className="flex-shrink-0 w-20 h-20 object-cover"
+							/>
+						) : (
+							<div className="flex justify-center items-center w-20 h-20">
+								<DonutImage />
+							</div>
+						)}
 
-            <div className="flex flex-col">
-              <strong className="font-medium text-base">{food.foodName}</strong>
-              <p className="text-muted-foreground text-sm">{`Rs. ${food.foodPrice}`}</p>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    </>
-  );
+						<div className="flex flex-col">
+							<strong className="font-medium text-base">{food.foodName}</strong>
+							<p className="text-muted-foreground text-sm">{`Rs. ${food.foodPrice}`}</p>
+						</div>
+					</div>
+				</motion.div>
+			</div>
+		</>
+	);
 }
 
 function EditDrawer({ food }: { food: FoodItemProps }) {
-  const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(false);
 
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  const editFoodItemsMutation = useMutation({
-    mutationFn: async (values: FoodItemProps) => {
-      const photoFile: File | null = values.foodPhoto as File | null;
-      // Upload the photo and get the storage URL
-      let storageURL = null;
-      if (photoFile !== null) {
-        storageURL = await uploadMenuItemImage(values.foodId, photoFile);
-      }
+	const editFoodItemsMutation = useMutation({
+		mutationFn: async (values: FoodItemProps) => {
+			const photoFile: File | null = values.foodPhoto as File | null;
+			// Upload the photo and get the storage URL
+			let storageURL = null;
+			if (photoFile !== null) {
+				storageURL = await uploadMenuItemImage(values.foodId, photoFile);
+			}
 
-      // Replace the foodPhoto with the storage URL
-      const valuesWithPhotoURL = {
-        ...values,
-        foodPhoto: storageURL,
-      };
+			// Replace the foodPhoto with the storage URL
+			const valuesWithPhotoURL = {
+				...values,
+				foodPhoto: storageURL,
+			};
 
-      // console.log("done adding", valuesWithPhotoURL);
+			// console.log("done adding", valuesWithPhotoURL);
 
-      // Call the editFoodItem function
-      await editFoodItem(valuesWithPhotoURL);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["foods"] });
-      toast("Food Item edited successfully!");
-    },
-    onError: (error: any) => {
-      toast("error!", error);
-    },
-  });
-  return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <Button variant={"ghost"} size="icon" className="rounded-full" onClick={() => setOpen(true)}>
-          <PencilIcon className="w-4 h-4" />
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="sm:max-w-[425px]">
-        <DrawerHeader>
-          <DrawerTitle>Edit Food Item</DrawerTitle>
-          <DrawerDescription>Edit the food item here. Click save when you're done.</DrawerDescription>
-        </DrawerHeader>
-        <Formik
-          initialValues={{
-            foodId: food.foodId,
-            foodName: food.foodName,
-            foodCategory: food.foodCategory,
-            foodPrice: food.foodPrice,
-            foodPhoto: food.foodPhoto,
-          }}
-          validationSchema={validationSchema}
-          onSubmit={(values) => {
-            editFoodItemsMutation.mutate(values);
-          }}
-        >
-          {(formik) => (
-            <Form>
-              <div className="gap-4 grid py-2">
-                <div className="items-center gap-4 grid grid-cols-4">
-                  <Label htmlFor="foodName" className="text-right">
-                    Food Name
-                  </Label>
-                  <div className="relative col-span-3">
-                    {formik.touched.foodName && formik.errors.foodName ? (
-                      <div className="top-0 absolute bg-white p-1 border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
-                        {formik.errors.foodName}
-                      </div>
-                    ) : null}
-                    <Input
-                      id="foodName"
-                      name="foodName"
-                      className="w-full"
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      value={formik.values.foodName}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="gap-4 grid py-2">
-                <div className="items-center gap-4 grid grid-cols-4">
-                  <Label htmlFor="foodCategory" className="text-right">
-                    Category
-                  </Label>
-                  <div className="relative col-span-3">
-                    {formik.touched.foodCategory && formik.errors.foodCategory ? (
-                      <div className="top-0 absolute bg-white p-1 border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
-                        {formik.errors.foodCategory}
-                      </div>
-                    ) : null}
-                    <Select
-                      name="foodCategory"
-                      onValueChange={(value) => formik.setFieldValue("foodCategory", value)}
-                      value={formik.values.foodCategory}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="appetizers">Appetizers</SelectItem>
-                        <SelectItem value="main_courses">Main Course</SelectItem>
-                        <SelectItem value="desserts">Dessert</SelectItem>
-                        <SelectItem value="beverages">Beverages</SelectItem>
+			// Call the editFoodItem function
+			await editFoodItem(valuesWithPhotoURL);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["foods"] });
+			toast("Food Item edited successfully!");
+		},
+		onError: (error: any) => {
+			toast("error!", error);
+		},
+	});
+	return (
+		<Drawer open={open} onOpenChange={setOpen}>
+			<DrawerTrigger asChild>
+				<Button
+					variant={"ghost"}
+					size="icon"
+					className="rounded-full"
+					onClick={() => setOpen(true)}
+				>
+					<PencilIcon className="w-4 h-4" />
+				</Button>
+			</DrawerTrigger>
+			<DrawerContent className="sm:max-w-[425px]">
+				<DrawerHeader>
+					<DrawerTitle>Edit Food Item</DrawerTitle>
+					<DrawerDescription>
+						Edit the food item here. Click save when you're done.
+					</DrawerDescription>
+				</DrawerHeader>
+				<Formik
+					initialValues={{
+						foodId: food.foodId,
+						foodName: food.foodName,
+						foodCategory: food.foodCategory,
+						foodPrice: food.foodPrice,
+						foodPhoto: food.foodPhoto,
+					}}
+					validationSchema={validationSchema}
+					onSubmit={(values) => {
+						editFoodItemsMutation.mutate(values);
+					}}
+				>
+					{(formik) => (
+						<Form>
+							<div className="gap-4 grid py-2">
+								<div className="items-center gap-4 grid grid-cols-4">
+									<Label htmlFor="foodName" className="text-right">
+										Food Name
+									</Label>
+									<div className="relative col-span-3">
+										{formik.touched.foodName && formik.errors.foodName ? (
+											<div className="top-0 absolute bg-white p-1 border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
+												{formik.errors.foodName}
+											</div>
+										) : null}
+										<Input
+											id="foodName"
+											name="foodName"
+											className="w-full"
+											onChange={formik.handleChange}
+											onBlur={formik.handleBlur}
+											value={formik.values.foodName}
+										/>
+									</div>
+								</div>
+							</div>
+							<div className="gap-4 grid py-2">
+								<div className="items-center gap-4 grid grid-cols-4">
+									<Label htmlFor="foodCategory" className="text-right">
+										Category
+									</Label>
+									<div className="relative col-span-3">
+										{formik.touched.foodCategory &&
+										formik.errors.foodCategory ? (
+											<div className="top-0 absolute bg-white p-1 border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
+												{formik.errors.foodCategory}
+											</div>
+										) : null}
+										<Select
+											name="foodCategory"
+											onValueChange={(value) =>
+												formik.setFieldValue("foodCategory", value)
+											}
+											value={formik.values.foodCategory}
+										>
+											<SelectTrigger className="w-[180px]">
+												<SelectValue placeholder="Category" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="appetizers">Appetizers</SelectItem>
+												<SelectItem value="main_courses">
+													Main Course
+												</SelectItem>
+												<SelectItem value="desserts">Dessert</SelectItem>
+												<SelectItem value="beverages">Beverages</SelectItem>
 
-                        <SelectItem value="hard_drinks">Hard Drinks</SelectItem>
-                        <SelectItem value="specials">Specials</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
+												<SelectItem value="hard_drinks">Hard Drinks</SelectItem>
+												<SelectItem value="specials">Specials</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
+							</div>
 
-              <div className="gap-4 grid py-2">
-                <div className="items-center gap-4 grid grid-cols-4">
-                  <Label htmlFor="foodPrice" className="text-right">
-                    Food Price
-                  </Label>
-                  <div className="relative col-span-3">
-                    {formik.touched.foodPrice && formik.errors.foodPrice ? (
-                      <div className="top-0 absolute bg-white p-1 border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
-                        {formik.errors.foodPrice}
-                      </div>
-                    ) : null}
-                    <Input
-                      id="foodPrice"
-                      name="foodPrice"
-                      type="number"
-                      className="w-full"
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      value={formik.values.foodPrice}
-                    />
-                  </div>
-                </div>
-              </div>
+							<div className="gap-4 grid py-2">
+								<div className="items-center gap-4 grid grid-cols-4">
+									<Label htmlFor="foodPrice" className="text-right">
+										Food Price
+									</Label>
+									<div className="relative col-span-3">
+										{formik.touched.foodPrice && formik.errors.foodPrice ? (
+											<div className="top-0 absolute bg-white p-1 border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
+												{formik.errors.foodPrice}
+											</div>
+										) : null}
+										<Input
+											id="foodPrice"
+											name="foodPrice"
+											type="number"
+											className="w-full"
+											onChange={formik.handleChange}
+											onBlur={formik.handleBlur}
+											value={formik.values.foodPrice}
+										/>
+									</div>
+								</div>
+							</div>
 
-              <div className="gap-4 grid py-2">
-                <div className="items-center gap-4 grid grid-cols-4">
-                  <Label htmlFor="foodPhoto" className="text-right">
-                    Food Photo
-                  </Label>
-                  <div className="relative col-span-3">
-                    {formik.touched.foodPhoto && formik.errors.foodPhoto ? (
-                      <div className="top-0 absolute bg-white border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
-                        {formik.errors.foodPhoto}
-                      </div>
-                    ) : null}
-                    <Input
-                      id="foodPhoto"
-                      name="foodPhoto"
-                      type="file"
-                      className="w-full"
-                      onChange={(event) => {
-                        formik.setFieldValue("foodPhoto", event.currentTarget.files?.[0] || "");
-                      }}
-                      onBlur={formik.handleBlur}
-                    />
-                  </div>
-                </div>
-              </div>
+							<div className="gap-4 grid py-2">
+								<div className="items-center gap-4 grid grid-cols-4">
+									<Label htmlFor="foodPhoto" className="text-right">
+										Food Photo
+									</Label>
+									<div className="relative col-span-3">
+										{formik.touched.foodPhoto && formik.errors.foodPhoto ? (
+											<div className="top-0 absolute bg-white border border-red-400 rounded text-red-500 text-xs -translate-y-full transform">
+												{formik.errors.foodPhoto}
+											</div>
+										) : null}
+										<Input
+											id="foodPhoto"
+											name="foodPhoto"
+											type="file"
+											className="w-full"
+											onChange={(event) => {
+												formik.setFieldValue(
+													"foodPhoto",
+													event.currentTarget.files?.[0] || "",
+												);
+											}}
+											onBlur={formik.handleBlur}
+										/>
+									</div>
+								</div>
+							</div>
 
-              <DrawerFooter>
-                <Button className="text-white" type="submit" onClick={() => setOpen(false)}>
-                  Save Changes
-                </Button>
-                <DrawerClose asChild>
-                  <Button type="button" variant="outline">
-                    Cancel
-                  </Button>
-                </DrawerClose>
-              </DrawerFooter>
-            </Form>
-          )}
-        </Formik>
-      </DrawerContent>
-    </Drawer>
-  );
+							<DrawerFooter>
+								<Button
+									className="text-white"
+									type="submit"
+									onClick={() => setOpen(false)}
+								>
+									Save Changes
+								</Button>
+								<DrawerClose asChild>
+									<Button type="button" variant="outline">
+										Cancel
+									</Button>
+								</DrawerClose>
+							</DrawerFooter>
+						</Form>
+					)}
+				</Formik>
+			</DrawerContent>
+		</Drawer>
+	);
 }
 
 function DeleteDrawer({ food }: { food: FoodItemProps }) {
-  const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(false);
 
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  const deleteFoodItemsMutation = useMutation({
-    mutationFn: async () => {
-      await deleteFoodItem(food.foodId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["foods"] });
-      toast("Food Item(s) removed successfully!");
-    },
-    onError: (error: any) => {
-      toast("Error!", error);
-    },
-  });
-  return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
-        <Button variant={"ghost"} size="icon" className="rounded-full" onClick={() => setOpen(true)}>
-          <Trash2Icon className="w-4 h-4" />
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className="sm:max-w-[425px]">
-        <DrawerHeader>
-          <DrawerTitle>Delete Food Item</DrawerTitle>
-          <DrawerDescription>Are you sure you want to delete {food.foodName}?</DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter>
-          <Button
-            className="text-white"
-            type="submit"
-            onClick={() => {
-              deleteFoodItemsMutation.mutate(); // Trigger the delete mutation
-              setOpen(false); // Close the drawer
-            }}
-          >
-            Save Changes
-          </Button>
-          <DrawerClose asChild>
-            <Button type="button" variant="outline">
-              Cancel
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  );
+	const deleteFoodItemsMutation = useMutation({
+		mutationFn: async () => {
+			await deleteFoodItem(food.foodId);
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["foods"] });
+			toast("Food Item(s) removed successfully!");
+		},
+		onError: (error: any) => {
+			toast("Error!", error);
+		},
+	});
+	return (
+		<Drawer open={open} onOpenChange={setOpen}>
+			<DrawerTrigger asChild>
+				<Button
+					variant={"ghost"}
+					size="icon"
+					className="rounded-full"
+					onClick={() => setOpen(true)}
+				>
+					<Trash2Icon className="w-4 h-4" />
+				</Button>
+			</DrawerTrigger>
+			<DrawerContent className="sm:max-w-[425px]">
+				<DrawerHeader>
+					<DrawerTitle>Delete Food Item</DrawerTitle>
+					<DrawerDescription>
+						Are you sure you want to delete {food.foodName}?
+					</DrawerDescription>
+				</DrawerHeader>
+				<DrawerFooter>
+					<Button
+						className="text-white"
+						type="submit"
+						onClick={() => {
+							deleteFoodItemsMutation.mutate(); // Trigger the delete mutation
+							setOpen(false); // Close the drawer
+						}}
+					>
+						Save Changes
+					</Button>
+					<DrawerClose asChild>
+						<Button type="button" variant="outline">
+							Cancel
+						</Button>
+					</DrawerClose>
+				</DrawerFooter>
+			</DrawerContent>
+		</Drawer>
+	);
 }

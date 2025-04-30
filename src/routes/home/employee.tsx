@@ -1,179 +1,26 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
 import { columns } from "@/components/employee";
 import { DataTable } from "@/components/ui/dataTable";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { getAllUsers, getCurrentUserDocumentDetails } from "@/firebase/firestore";
 
-import { useQuery } from "@tanstack/react-query";
 import { useLoadingSpinner } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
-const dummyUsers: any = [
-  {
-    uid: "1",
-    email: "john.doe@example.com",
-    photoURL: null,
-    firstName: "John",
-    lastName: "Doe",
-    phoneNumber: "123-456-7890",
-    department: "Sales",
-    role: "admin",
-    isProfileComplete: true,
-  },
-  {
-    uid: "2",
-    email: "jane.smith@example.com",
-    photoURL: "https://example.com/photo.jpg",
-    firstName: "Jane",
-    lastName: "Smith",
-    phoneNumber: "987-654-3210",
-    department: "Marketing",
-    role: "owner",
-    isProfileComplete: true,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-  {
-    uid: "3",
-    email: "bob.johnson@example.com",
-    photoURL: null,
-    firstName: "Bob",
-    lastName: "Johnson",
-    phoneNumber: "555-555-5555",
-    department: "HR",
-    role: "employee",
-    isProfileComplete: false,
-  },
-];
+// const dummyUsers: any = [
+// 	{
+// 		uid: "1",
+// 		email: "john.doe@example.com",
+// 		photoURL: null,
+// 		firstName: "John",
+// 		lastName: "Doe",
+// 		phoneNumber: "123-456-7890",
+// 		department: "Sales",
+// 		role: "admin",
+// 		isProfileComplete: true,
+// 	},
+
+// ];
 
 export const Route = createFileRoute("/home/employee")({
   component: () => {
@@ -184,8 +31,8 @@ export const Route = createFileRoute("/home/employee")({
     } = useQuery({
       queryKey: ["usersManagement"],
       queryFn: getAllUsers,
-      staleTime: Infinity,
-      gcTime: Infinity,
+      staleTime: Number.POSITIVE_INFINITY,
+      gcTime: Number.POSITIVE_INFINITY,
     });
 
     useLoadingSpinner(isLoading);

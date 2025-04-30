@@ -1,41 +1,19 @@
+import { doSignInWithGoogle } from "@/firebase/auth";
+import { useNavigate } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
+import type React from "react";
+import { useState } from "react";
+import cafe_logo from "../assets/Logo.png";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { ModeToggle } from "./ui/themeToggle";
-import cafe_logo from "../assets/Logo.png";
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { useNavigate } from "@tanstack/react-router";
-import { doSignInWithEmailAndPassword, doSignInWithGoogle } from "@/firebase/auth";
-import { useAuth } from "./contexts/authProvider";
 
-function LoginForm({ setActiveForm }: { setActiveForm: (activeForm: "login" | "signup") => void }) {
+function LoginForm({}: { setActiveForm: (activeForm: "login" | "signup") => void }) {
   const navigate = useNavigate({ from: "/" });
-  const { currentUser } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const loginWithEmail = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    if (!isSigningIn) {
-      setIsSigningIn(true);
-      try {
-        await doSignInWithEmailAndPassword(email, password);
-        console.log("currentUser", currentUser);
-
-        if (currentUser != null) {
-          navigate({ to: "/home/welcome" });
-        }
-      } catch (error) {
-        console.error("Error signing in with email: ", error);
-        setErrorMessage((error as Error).message);
-      } finally {
-        setIsSigningIn(false);
-      }
-    }
-  };
 
   const loginWithGoogle = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -46,7 +24,10 @@ function LoginForm({ setActiveForm }: { setActiveForm: (activeForm: "login" | "s
         if (!isProfileComplete) {
           navigate({ to: "/profileComplete" });
         } else {
-          navigate({ to: "/home/editMenu", search: { category: "appetizers" } });
+          navigate({
+            to: "/home/editMenu",
+            search: { category: "appetizers" },
+          });
         }
       } catch (error) {
         console.error("Error signing in with Google: ", error);
