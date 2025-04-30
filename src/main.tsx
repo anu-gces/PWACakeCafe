@@ -9,6 +9,7 @@ import { routeTree } from "./routeTree.gen";
 const queryClient = new QueryClient();
 
 const router = createRouter({
+  basepath: "/PWACakeCafe",
   routeTree,
   context: {
     queryClient,
