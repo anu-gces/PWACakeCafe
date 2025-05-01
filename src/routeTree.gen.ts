@@ -113,7 +113,9 @@ const HomeDashboardRoute = HomeDashboardImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => HomeRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/home/dashboard.lazy').then((d) => d.Route),
+)
 
 const HomeCalendarRoute = HomeCalendarImport.update({
   id: '/calendar',

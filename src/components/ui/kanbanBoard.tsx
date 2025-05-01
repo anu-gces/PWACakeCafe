@@ -242,7 +242,7 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`h-full w-full p-2  pr-6 transition-colors rounded ${active ? "bg-input/100" : "bg-black/0"}`}
+        className={`h-full w-full p-2  pr-12 transition-colors rounded ${active ? "bg-input/100" : "bg-black/0"}`}
       >
         <KanbanAddCard column={column} setCards={setCards} />
 
