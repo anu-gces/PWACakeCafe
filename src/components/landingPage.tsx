@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import type React from "react";
 import { useState } from "react";
-import cafe_logo from "../assets/Logo.png";
+import CakeCakeLogo from "../assets/Logob.png";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -158,13 +158,26 @@ export function LandingPage() {
 
   return (
     <>
-      <div className="lg:grid lg:grid-cols-2 p-12 w-screen h-screen lg:min-h-[600px] xl:min-h-[800px] overflow-hidden">
+      <div className="flex lg:flex-row flex-col p-4 w-screen h-screen">
         <div className="top-0 right-0 z-10 absolute p-12">
           <ModeToggle />
         </div>
+
         <AnimatePresence mode="wait">
           <motion.div
-            className="flex justify-center items-center lg:order-2 py-12 w-full h-full"
+            className="flex justify-center items-end lg:items-center pb-4 w-full lg:w-1/2 h-1/2 lg:h-full"
+            variants={variants2}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <img src={CakeCakeLogo} alt="Image" className="w-50 object-contain" />
+          </motion.div>
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="flex justify-center items-start lg:items-center pt-4 border-t-1 lg:border-t-0 lg:border-l-1 w-full lg:w-1/2 h-1/2 lg:h-full"
             variants={variants}
             initial="hidden"
             animate="visible"
@@ -176,17 +189,6 @@ export function LandingPage() {
             ) : (
               <SignupForm setActiveForm={setActiveForm} />
             )}
-          </motion.div>
-        </AnimatePresence>
-        <AnimatePresence mode="wait">
-          <motion.div
-            className="hidden lg:flex lg:justify-center lg:items-center lg:order-1 bg-transparent lg:border-r lg:w-full lg:h-full"
-            variants={variants2}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-          >
-            <img src={cafe_logo} alt="Image" className="w-50 object-contain" />
           </motion.div>
         </AnimatePresence>
       </div>

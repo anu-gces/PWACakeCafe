@@ -18,7 +18,7 @@ export default defineConfig({
         start_url: "/",
         display: "standalone",
         background_color: "#ffffff",
-        theme_color: "#ff5722",
+        theme_color: "#e11d48",
         icons: [
           {
             src: "/CakeCafeLogo.png",
