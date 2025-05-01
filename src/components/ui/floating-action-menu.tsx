@@ -73,7 +73,7 @@ const FloatingActionMenu = ({ options, className }: FloatingActionMenuProps) => 
                   <Button
                     onClick={option.onClick}
                     size="sm"
-                    className="flex items-center gap-2 bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-md backdrop-blur-md border border-white/30 dark:border-white/20 rounded-xl text-gray-800 dark:text-white"
+                    className="flex items-center gap-2 bg-white/100 hover:bg-white/60 dark:bg-black/100 dark:hover:bg-black/60 shadow-md backdrop-blur-md border border-white/30 dark:border-white/20 rounded-xl text-gray-800 dark:text-white"
                   >
                     {option.Icon}
                     <span>{option.label}</span>
