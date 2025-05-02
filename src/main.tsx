@@ -1,9 +1,15 @@
+import { scan } from "react-scan";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import SplashScreen from "./components/splashscreen";
+
+scan({
+  enabled: false,
+});
 
 // Create a QueryClient instance
 const queryClient = new QueryClient();
@@ -15,6 +21,7 @@ const router = createRouter({
   },
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
+  defaultPendingComponent: SplashScreen,
 });
 
 declare module "@tanstack/react-router" {

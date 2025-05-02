@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { enterKanbanCardDocument, getKanbanCardDocument } from "@/firebase/firestore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { GripVertical, Loader, Plus, SaveIcon, Trash2 } from "lucide-react";
+import { GripVertical, Loader, Plus, SaveIcon, Trash2, XIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { type Dispatch, type DragEvent, type FormEvent, type SetStateAction, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -107,7 +107,7 @@ export function KanbanBoard() {
         />
       </div>
 
-      <div className="flex flex-col flex-1/5 gap-6 bg-muted dark:bg-background shadow-sm rounded-lg w-full h-full overflow-hidden text-card-foreground">
+      <div className="flex flex-col flex-1/5 gap-6 bg-muted dark:bg-background rounded-lg w-full h-full overflow-hidden text-card-foreground">
         <Button
           className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-background text-sm transition-opacity duration-500"
           onClick={saveCards} // Save cards when button is clicked
@@ -388,22 +388,15 @@ const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
             placeholder="Add new item..."
             className="rounded w-full"
           />
-          <div className="flex justify-end">
-            <div className="flex justify-end items-center gap-1.5 bg-gray-100 dark:bg-stone-900 mt-1.5 p-1 border border-gray-100 dark:border-0 rounded-lg">
-              <button
-                onClick={() => setAdding(false)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm transition-opacity duration-500"
-              >
-                Close
-              </button>
-              <button
-                type="submit"
-                className="inline-flex relative justify-center items-center bg-white hover:bg-muted-background dark:bg-background shadow-sm px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary min-w-24 text-primary hover:text-red-400 dark:text-white text-sm"
-              >
-                <Plus />
-                <span>Add</span>
-              </button>
-            </div>
+          <div className="flex justify-end gap-1.5 p-2">
+            <Button variant="outline" onClick={() => setAdding(false)}>
+              <XIcon />
+              <span className="hidden lg:block">Close</span>
+            </Button>
+            <Button type="submit">
+              <Plus color="white" />
+              <span className="hidden lg:block">Add</span>
+            </Button>
           </div>
         </motion.form>
       ) : (
