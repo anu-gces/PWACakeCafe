@@ -26,7 +26,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               loading: <Loader />,
             }}
           />
-          <TanStackRouterDevtools position="top-right" />
+          <TanStackRouterDevtools position="bottom-right" />
           <ReactQueryDevtools initialIsOpen={false} />
         </AuthProvider>
       </div>

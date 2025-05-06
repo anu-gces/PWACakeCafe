@@ -4,9 +4,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: LandingPage,
-  pendingComponent: () => {
-    <div className="bg-red-500 w-screen h-screen">loading..</div>;
-  },
+
   beforeLoad: async ({ location }) => {
     const user = await getCurrentUserDetails();
 

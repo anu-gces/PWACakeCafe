@@ -102,6 +102,9 @@ export function Home() {
     };
   }, [wasOffline]);
 
+  const splash = document.querySelector(".splash-container");
+  if (splash) splash.remove();
+
   return (
     <div className="flex flex-col justify-between h-[100dvh]">
       <div className="flex justify-between items-center bg-background shadow-md dark:shadow-2xl p-4 border-b border-border">

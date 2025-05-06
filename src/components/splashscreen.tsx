@@ -5,8 +5,8 @@ const SplashScreen = () => {
   //   console.log("weird");
   // }, []);
   return (
-    <div className="flex justify-center items-center bg-transparent w-screen h-screen -2xl">
-      <div className="top-0 left-0 z-10 fixed flex flex-col justify-center items-center w-full h-full overflow-hidden">
+    <div className="flex justify-center items-center w-screen h-screen">
+      <div className="flex flex-col justify-center items-center">
         <svg version="1.1" className="w-24 h-24" viewBox="0 0 108 108">
           <g id="donut-back">
             <ellipse
@@ -125,7 +125,7 @@ const SplashScreen = () => {
             </g>
           </g>
         </svg>
-        <p className="pl-3 text-2d0202 text-center">Preparing your Cake...</p>
+        <p>Preparing your Cake...</p>
       </div>
     </div>
   );
