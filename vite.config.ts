@@ -5,12 +5,13 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    TanStackRouterVite({ target: "react", autoCodeSplitting: true }), // put FIRST to avoid error
-    react(), // put SECOND
+    TanStackRouterVite({ target: "react", autoCodeSplitting: true }),
+    react(),
     VitePWA({
+      registerType: "autoUpdate", // Auto update service worker
+      includeAssets: ["favicon.ico", "CakeCafeLogo.png", "robots.txt"],
       manifest: {
         name: "Cake Cafe",
         short_name: "CakeCafe",
@@ -33,37 +34,60 @@ export default defineConfig({
         ],
       },
       workbox: {
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"], // Precaches Vite build output
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*$/,
-            handler: "NetworkFirst", // Fetch from network first, fallback to cache
+            handler: "NetworkFirst",
             options: {
               cacheName: "firestore-api-cache",
               expiration: {
-                maxEntries: 50, // Cache up to 50 requests
-                maxAgeSeconds: 86400, // Cache for 1 day
+                maxEntries: 50,
+                maxAgeSeconds: 86400,
               },
             },
           },
           {
             urlPattern: /^https:\/\/identitytoolkit\.googleapis\.com\/.*$/,
-            handler: "NetworkFirst", // Fetch from network first, fallback to cache
+            handler: "NetworkFirst",
             options: {
               cacheName: "auth-api-cache",
               expiration: {
-                maxEntries: 20, // Cache up to 20 requests
-                maxAgeSeconds: 3600, // Cache for 1 hour
+                maxEntries: 20,
+                maxAgeSeconds: 3600,
               },
             },
           },
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
-            handler: "CacheFirst", // Cache images for faster loading
+            handler: "CacheFirst",
             options: {
               cacheName: "image-cache",
               expiration: {
-                maxEntries: 100, // Cache up to 100 images
-                maxAgeSeconds: 2592000, // Cache for 30 days
+                maxEntries: 100,
+                maxAgeSeconds: 2592000,
+              },
+            },
+          },
+          {
+            urlPattern: /\/assets\/.*\.(js|css)/, // Vite static assets
+            handler: "CacheFirst",
+            options: {
+              cacheName: "static-resources",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 31536000, // 1 year
+              },
+            },
+          },
+          {
+            urlPattern: /^\/$/, // App shell root
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-cache",
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 86400,
               },
             },
           },
