@@ -5,11 +5,10 @@ import type React from "react";
 import { useState } from "react";
 import CakeCakeLogo from "../assets/Logob.png";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+
 import { ModeToggle } from "./ui/themeToggle";
 
-function LoginForm({}: { setActiveForm: (activeForm: "login" | "signup") => void }) {
+function LoginForm() {
   const navigate = useNavigate({ from: "/" });
 
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -45,47 +44,6 @@ function LoginForm({}: { setActiveForm: (activeForm: "login" | "signup") => void
         <p className="text-muted-foreground text-balance">Cick the Button below to login to your account.</p>
       </div>
       <div className="gap-4 grid">
-        {/* <div className="gap-2 grid">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="m@example.com"
-            required
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="gap-2 grid">
-          <div className="flex items-center">
-            <Label htmlFor="password">Password</Label>
-            <a
-              href="/forgot-password"
-              className="inline-block ml-auto dark:text-white text-sm underline"
-            >
-              Forgot your password?
-            </a>
-          </div>
-          <Input
-            id="password"
-            type="password"
-            required
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <Button
-          onClick={(e) => loginWithEmail(e)}
-          type="submit"
-          className="w-full"
-        >
-          Login
-        </Button>
-        <Button
-          onClick={() => navigate({ to: "/profileComplete" })}
-          type="submit"
-          className="w-full"
-        >
-          button for testing
-        </Button> */}
         <Button className="w-full" onClick={loginWithGoogle}>
           Login with Google
         </Button>
@@ -93,57 +51,11 @@ function LoginForm({}: { setActiveForm: (activeForm: "login" | "signup") => void
           <div className="mt-4 p-2 border border-primary rounded text-primary text-center">{errorMessage}</div>
         )}
       </div>
-      {/* <div className="mt-4 text-sm text-center">
-        Don't have an account?{" "}
-        <a
-          href="#"
-          className="underline"
-          onClick={() => setActiveForm("signup")}
-        >
-          Sign up
-        </a>
-      </div> */}
-    </div>
-  );
-}
-
-function SignupForm({ setActiveForm }: { setActiveForm: (form: "login" | "signup") => void }) {
-  return (
-    <div className="gap-6 grid mx-auto w-[350px]">
-      <div className="gap-2 grid text-center">
-        <h1 className="font-bold text-3xl">Sign Up</h1>
-        <p className="text-muted-foreground text-balance">Enter your details below to create a new account</p>
-      </div>
-      <div className="gap-4 grid">
-        <div className="gap-2 grid">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="m@example.com" required />
-        </div>
-        <div className="gap-2 grid">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" required />
-        </div>
-        <div className="gap-2 grid">
-          <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input id="confirmPassword" type="password" required />
-        </div>
-        <Button type="submit" className="w-full">
-          Sign Up
-        </Button>
-      </div>
-      <div className="mt-4 text-sm text-center">
-        Already have an account?{" "}
-        <a href="#" onClick={() => setActiveForm("login")} className="underline">
-          Login
-        </a>
-      </div>
     </div>
   );
 }
 
 export function LandingPage() {
-  const [activeForm, setActiveForm] = useState<"login" | "signup">("login");
-
   const variants = {
     hidden: { x: "75vw", transition: { duration: 0.5 } },
     visible: { x: 0, transition: { duration: 0.5 } },
@@ -182,13 +94,9 @@ export function LandingPage() {
             initial="hidden"
             animate="visible"
             exit="exit"
-            key={activeForm}
+            key={"login-form"}
           >
-            {activeForm === "login" ? (
-              <LoginForm setActiveForm={setActiveForm} />
-            ) : (
-              <SignupForm setActiveForm={setActiveForm} />
-            )}
+            <LoginForm />
           </motion.div>
         </AnimatePresence>
       </div>
