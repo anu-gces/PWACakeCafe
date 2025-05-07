@@ -16,64 +16,65 @@ type Order = {
   processedBy: { name: string };
 };
 
-// Define column definitions for the main header (Order-related info)
+const orders = [
+  {
+    orderId: "order123",
+    discountRate: 0.1,
+    taxRate: 0.13,
+    items: [
+      { foodName: "Waffle Cone", quantity: 2, price: 5 },
+      { foodName: "Blueberry Cheesecake", quantity: 1, price: 6 },
+    ],
+    totalAmount: 15.7,
+    orderDate: "2025-05-06T12:00:00Z",
+    processedBy: "John Doe",
+  },
+  {
+    orderId: "order456",
+    discountRate: 0.15,
+    taxRate: 0.1,
+    items: [
+      { foodName: "Pasta", quantity: 1, price: 8 },
+      { foodName: "Garlic Bread", quantity: 2, price: 4 },
+    ],
+    totalAmount: 18.2,
+    orderDate: "2025-05-06T14:00:00Z",
+    processedBy: "Jane Smith",
+  },
+];
+
 export const columns: ColumnDef<Order>[] = [
-  // Main Header (Order Info)
   {
-    header: "Order Info",
-    columns: [
-      {
-        header: "Order ID",
-        accessorKey: "orderId",
-      },
-      {
-        header: "Discount Rate",
-        accessorKey: "discountRate",
-        cell: ({ getValue }) => `${(getValue() * 100).toFixed(2)}%`, // Display as percentage
-      },
-      {
-        header: "Tax Rate",
-        accessorKey: "taxRate",
-        cell: ({ getValue }) => `${(getValue() * 100).toFixed(2)}%`, // Display as percentage
-      },
-      {
-        header: "Order Date",
-        accessorKey: "orderDate",
-        cell: ({ getValue }) => new Date(getValue()).toLocaleString(), // Format date
-      },
-      {
-        header: "Processed By",
-        accessorKey: "processedBy.name", // Nested property for processedBy
-      },
-    ],
+    accessorKey: "orderId",
+    id: "Order ID",
+    header: "Order ID",
   },
-
-  // Sub Header (Items)
   {
-    header: "Items",
-    columns: [
-      {
-        header: "Item Name",
-        accessorKey: "items", // We're dealing with an array of items
-        cell: ({ row }) => row.original.items.map((item) => item.foodName).join(", "),
-      },
-      {
-        header: "Quantity",
-        accessorKey: "items",
-        cell: ({ row }) => row.original.items.map((item) => item.quantity).join(", "),
-      },
-      {
-        header: "Price",
-        accessorKey: "items",
-        cell: ({ row }) => row.original.items.map((item) => item.price).join(", "),
-      },
-    ],
+    accessorKey: "discountRate",
+    id: "Discount Rate",
+    header: "Discount Rate",
+    cell: ({ getValue }) => `${getValue<number>() * 100}%`, // Format the value as a percentage
   },
-
-  // Footer (Total Money)
   {
-    footer: "Total Money",
+    accessorKey: "taxRate",
+    id: "Tax Rate",
+    header: "Tax Rate",
+    cell: ({ getValue }) => `${getValue<number>() * 100}%`, // Format the value as a percentage
+  },
+  {
     accessorKey: "totalAmount",
-    cell: ({ getValue }) => getValue(),
+    id: "Total Amount",
+    header: "Total Amount",
+    cell: ({ getValue }) => `Rs. ${getValue<number>().toFixed(2)}`, // Format the value with "Rs." and two decimal places
+  },
+  {
+    accessorKey: "orderDate",
+    id: "Order Date",
+    header: "Order Date",
+  },
+  {
+    accessorKey: "processedBy.name",
+    id: "Processed By",
+    header: "Processed By",
   },
 ];

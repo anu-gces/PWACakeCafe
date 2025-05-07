@@ -80,7 +80,7 @@ function CategoryTabs() {
   );
 }
 
-function editMenu() {
+export function editMenu() {
   const { category } = editMenuRoute.useSearch();
 
   const [foods, setFoods] = useState<FoodItemProps[]>([]);
@@ -133,7 +133,7 @@ function editMenu() {
   return (
     <div className="">
       <div className="w-full">
-        <div className="right-4 bottom-28 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
+        <div className="right-4 bottom-28 z-50 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
           <RotateCwIcon
             className="text-rose-600 dark:text-white"
             onClick={() => {
@@ -192,7 +192,7 @@ type BillProps = {
 function CreateOrderDrawer({ addToCart, setAddToCart }: BillProps) {
   return (
     <Drawer>
-      <DrawerTrigger className="right-4 bottom-16 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
+      <DrawerTrigger className="right-4 bottom-16 z-50 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
         <>
           <span
             className={cn(
@@ -292,7 +292,7 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
                 <TableCell className="text-center">
                   <NumberInput
                     value={item.qty}
-                    onValueChange={(val: number) => updateQty(item.foodId, val ?? 0)}
+                    onValueChange={(val = 0) => updateQty(item.foodId, val ?? 0)}
                     className="px-1 py-0 w-12 h-8 text-center"
                   />
                 </TableCell>
@@ -315,7 +315,7 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
                     min={0}
                     max={100}
                     value={discountRate}
-                    onValueChange={(val: number) => {
+                    onValueChange={(val = 0) => {
                       setDiscountRate(val);
                       setAddToCart((prev) => ({
                         ...prev,
@@ -338,7 +338,7 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
                     min={0}
                     max={100}
                     value={taxRate}
-                    onValueChange={(val: number) => {
+                    onValueChange={(val = 0) => {
                       setTaxRate(val);
                       setAddToCart((prev) => ({
                         ...prev,
@@ -401,7 +401,7 @@ function AddDrawer() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <div className="right-4 bottom-4 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
+        <div className="right-4 bottom-4 z-50 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
           <PlusIcon className="text-rose-600 dark:text-white" />
         </div>
       </DrawerTrigger>
@@ -542,5 +542,3 @@ function AddDrawer() {
     </Drawer>
   );
 }
-
-export default editMenu;
