@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import * as React from "react";
@@ -50,13 +50,30 @@ const spanVariants = {
 const transition = { delay: 0.1, type: "spring", bounce: 0, duration: 0.6 };
 
 export function ExpandableTabs({ tabs, className, activeColor = "text-primary", onChange }: ExpandableTabsProps) {
-  const [selected, setSelected] = React.useState<number | null>(0);
+  const [selected, setSelected] = React.useState<number | null>(null);
   const navigate = useNavigate({ from: "/home" });
+  const currentLocation = useLocation();
 
   const handleSelect = (index: number) => {
     setSelected(index);
     onChange?.(index);
   };
+
+  React.useEffect(() => {
+    const currentPath = currentLocation.pathname; // Get the current path from useLocation
+
+    const selectedIndex = tabs.findIndex((tab) => {
+      if ("to" in tab && typeof tab.to === "string") {
+        const tabPath = new URL(tab.to, window.location.origin).pathname;
+        return tabPath === currentPath;
+      }
+      return false;
+    });
+
+    if (selectedIndex !== -1) {
+      setSelected(selectedIndex); // Update the selected tab index
+    }
+  }, [tabs, currentLocation]);
 
   const Separator = () => <div className="mx-1 bg-border w-[1.2px] h-[24px]" aria-hidden="true" />;
 

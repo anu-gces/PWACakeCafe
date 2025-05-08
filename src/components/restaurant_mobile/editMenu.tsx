@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { uploadMenuItemImage } from "@/firebase/firebase_storage";
-import { enterFoodItem, getFoodItems } from "@/firebase/firestore";
+import { createOrderDocument, enterFoodItem, getFoodItems } from "@/firebase/firestore";
 import { cn, useLoadingSpinner } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -33,6 +33,7 @@ import { OriginTabs, OriginTabsList, OriginTabsTrigger } from "../ui/originTabs"
 import { ScrollArea } from "../ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { NumberInput } from "../ui/number-input";
+import { auth } from "@/firebase/firebase";
 
 export type FoodItemProps = {
   foodId: string;
@@ -178,7 +179,7 @@ export function editMenu() {
   );
 }
 
-type AddToCart = {
+export type AddToCart = {
   items: CartItem[];
   discountRate: number;
   taxRate: number;
@@ -190,6 +191,16 @@ type BillProps = {
 };
 
 function CreateOrderDrawer({ addToCart, setAddToCart }: BillProps) {
+  const enterOrderMutation = useMutation({
+    mutationFn: createOrderDocument,
+    onSuccess: () => {
+      toast.success("Order placed successfully!");
+      setAddToCart({ items: [], discountRate: 0, taxRate: 0 });
+    },
+    onError: (error: any) => {
+      toast.error(`Error: ${error.message}`);
+    },
+  });
   return (
     <Drawer>
       <DrawerTrigger className="right-4 bottom-16 z-50 absolute flex justify-center items-center bg-white/40 hover:bg-white/60 dark:bg-black/40 dark:hover:bg-black/60 shadow-xl backdrop-blur-md border border-white/30 dark:border-white/20 rounded-full w-10 h-10 text-gray-800 dark:text-white align-middle">
@@ -210,7 +221,7 @@ function CreateOrderDrawer({ addToCart, setAddToCart }: BillProps) {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <div className="flex md:flex-row flex-col md:justify-between items-center gap-4 p-2">
+          <div className="flex md:flex-row flex-col md:justify-center lg:justify-center items-center gap-4 p-2">
             <div className="flex items-center gap-4">
               <img src={CakeCafeLogo} width="48" height="48" alt="Company Logo" className="rounded-md" />
               <div className="gap-2 grid">
@@ -236,8 +247,7 @@ function CreateOrderDrawer({ addToCart, setAddToCart }: BillProps) {
           <DrawerClose asChild>
             <Button
               onClick={() => {
-                console.log("addtocart", addToCart);
-                setAddToCart({ items: [], discountRate: 0, taxRate: 0 });
+                enterOrderMutation.mutate(addToCart);
               }}
             >
               Submit
@@ -354,9 +364,10 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
             </TableRow>
 
             <TableRow>
-              <TableCell colSpan={2} className="font-semibold text-right">
-                Total
+              <TableCell className="text-gray-500 text-xs text-left">
+                Processed By: {auth.currentUser?.displayName ?? auth.currentUser?.email}
               </TableCell>
+              <TableCell className="font-semibold text-right">Total</TableCell>
               <TableCell className="font-bold text-right">Rs.{total.toFixed(2)}</TableCell>
             </TableRow>
           </TableBody>

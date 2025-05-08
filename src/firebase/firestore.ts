@@ -1,5 +1,4 @@
 import type { calendarEventProps } from "@/components/calendar";
-import type { OrderProps } from "@/components/restaurant/orders";
 import type { FoodItemProps } from "@/components/restaurant/restaurant";
 // import { FirebaseError } from "firebase/app";
 import { type User, getAuth, onAuthStateChanged } from "firebase/auth";
@@ -21,6 +20,8 @@ import {
 } from "firebase/firestore";
 import { app } from "./firebase";
 import { deleteMenuItemImage } from "./firebase_storage";
+import { AddToCart } from "@/components/restaurant_mobile/editMenu";
+import { generateReceiptId } from "./firestore.utils";
 
 //export const db = getFirestore(app);
 
@@ -306,28 +307,64 @@ export async function deleteFoodItem(foodIdToDelete: string) {
   }
 }
 
-export async function createOrderHistoryEntry(orderDetails: OrderProps) {
+import { format } from "date-fns";
+
+export async function createOrderDocument(orderDetails: AddToCart) {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  if (user) {
-    const orderHistoryEntry = {
-      ...orderDetails,
-      processedBy: user.displayName,
-    };
+  if (!user) throw new Error("No authenticated user found");
 
-    const orderHistoryRef = doc(collection(db, "orderHistory"));
+  const processedBy = user.displayName || user.email || "unknown";
+  const receiptId = generateReceiptId(); // e.g., "CAKE-X8F4L9"
+  const receiptDate = new Date().toISOString();
 
-    try {
-      await setDoc(orderHistoryRef, orderHistoryEntry);
-      console.log("Order history entry created successfully");
-    } catch (error) {
-      console.error(`Failed to create order history entry: ${error}`);
-      throw new Error(`Failed to create order history entry: ${error}`);
-    }
-  } else {
-    console.error("No authenticated user found");
-    throw new Error("No authenticated user found");
+  const orderData = {
+    ...orderDetails,
+    processedBy,
+    receiptId,
+    receiptDate,
+  };
+
+  const formattedDate = format(new Date(), "dd-MMM-yyyy-HH_mm_ss");
+  const docId = `${formattedDate}_${receiptId}`;
+
+  const orderRef = doc(collection(db, "orderHistory"), docId);
+
+  try {
+    await setDoc(orderRef, orderData);
+    console.log("Order successfully created:", receiptId);
+  } catch (error) {
+    console.error("Error creating order document:", error);
+    throw error;
+  }
+}
+
+export async function getAllOrders(): Promise<
+  (AddToCart & {
+    processedBy: string;
+    receiptDate: string;
+    receiptId: string;
+  })[]
+> {
+  try {
+    const ordersRef = collection(db, "orderHistory");
+    const querySnapshot = await getDocs(ordersRef);
+
+    const orders = querySnapshot.docs.map(
+      (doc) =>
+        doc.data() as AddToCart & {
+          processedBy: string;
+          receiptDate: string;
+          receiptId: string;
+        }
+    );
+
+    console.log("Orders retrieved successfully:", orders);
+    return orders;
+  } catch (error) {
+    console.error("Error retrieving orders:", error);
+    throw error;
   }
 }
 

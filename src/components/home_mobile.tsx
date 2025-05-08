@@ -17,6 +17,7 @@ import {
   CalendarIcon,
   DollarSignIcon,
   HelpCircleIcon,
+  HistoryIcon,
   MenuIcon,
   PackageOpenIcon,
   SettingsIcon,
@@ -33,11 +34,18 @@ import { Button } from "./ui/button";
 import { ExpandableTabs, type TabItem } from "./ui/expandable-tabs";
 import { Separator } from "./ui/separator";
 import { ModeToggle } from "./ui/themeToggle";
+import fallbackAvatar from "@/assets/fallbackAvatar.png";
+
 const tabs: TabItem[] = [
   {
     title: "Order",
     icon: UtensilsIcon,
     to: '/home/editMenu?category="appetizers"',
+  },
+  {
+    title: "History",
+    icon: HistoryIcon,
+    to: "/home/billing",
   },
   { title: "Notifications", icon: BellIcon, to: "/home/notifications" },
   { title: "Stocks", icon: PackageOpenIcon, to: "/home/stock" },
@@ -117,8 +125,11 @@ export function Home() {
             <Drawer direction="left">
               <DrawerTrigger asChild>
                 <Avatar className="w-10 h-10 cursor-pointer">
-                  <AvatarImage src={user?.photoURL} alt="User Avatar" />
-                  <AvatarFallback>{user?.displayName?.charAt(0)}</AvatarFallback>
+                  <AvatarImage src={user?.profilePicture || user?.photoURL || fallbackAvatar} alt="User Avatar" />
+                  <AvatarFallback>
+                    {user?.firstName?.charAt(0).toUpperCase() || "U"}
+                    {user?.lastName?.charAt(0).toUpperCase() || "U"}
+                  </AvatarFallback>
                 </Avatar>
               </DrawerTrigger>
               <DrawerContent className="flex flex-col justify-between h-full">

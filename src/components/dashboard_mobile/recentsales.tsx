@@ -1,88 +1,162 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const salesData = [
-	{
-		id: 1,
-		name: "Olivia Martin",
-		email: "olivia.martin@email.com",
-		amount: "+$1,999.00",
-		avatar: "/avatars/01.png",
-		fallback: "OM",
-	},
-	{
-		id: 2,
-		name: "Jackson Lee",
-		email: "jackson.lee@email.com",
-		amount: "+$39.00",
-		avatar: "/avatars/02.png",
-		fallback: "JL",
-	},
-	{
-		id: 3,
-		name: "Isabella Nguyen",
-		email: "isabella.nguyen@email.com",
-		amount: "+$299.00",
-		avatar: "/avatars/03.png",
-		fallback: "IN",
-	},
-	{
-		id: 4,
-		name: "William Kim",
-		email: "will@email.com",
-		amount: "+$99.00",
-		avatar: "/avatars/04.png",
-		fallback: "WK",
-	},
-	{
-		id: 5,
-		name: "Sofia Davis",
-		email: "sofia.davis@email.com",
-		amount: "+$39.00",
-		avatar: "/avatars/05.png",
-		fallback: "SD",
-	},
-	{
-		id: 6,
-		name: "Breh Davis",
-		email: "breh.davis@email.com",
-		amount: "+$39.00",
-		avatar: "/avatars/05.png",
-		fallback: "SD",
-	},
-	{
-		id: 7,
-		name: "NotBreh Davis",
-		email: "notbreh.davis@email.com",
-		amount: "+$39.00",
-		avatar: "/avatars/05.png",
-		fallback: "SD",
-	},
-	{
-		id: 8,
-		name: "Sofia Ansari",
-		email: "sofia.davis@email.com",
-		amount: "+$39.00",
-		avatar: "/avatars/05.png",
-		fallback: "SD",
-	},
+  {
+    receiptId: "CAKE-MYITWK",
+    receiptDate: "2025-05-08T08:32:47.116Z",
+    processedBy: "Anu",
+    items: [
+      {
+        foodName: "Ice Cream",
+        foodCategory: "Appetizers",
+        foodPrice: 300,
+        qty: 1,
+        foodId: "37b3627b1e5f3",
+      },
+    ],
+    discountRate: 10,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
+  {
+    receiptId: "PIZZA-XRTY89",
+    receiptDate: "2025-05-07T17:14:32.000Z",
+    processedBy: "Ravi",
+    items: [
+      {
+        foodName: "Cheese Pizza",
+        foodCategory: "Main Course",
+        foodPrice: 850,
+        qty: 2,
+        foodId: "pizza123",
+      },
+    ],
+    discountRate: 5,
+    taxRate: 13,
+  },
 ];
 
+function calculateTotal(item: any, discountRate: number, taxRate: number): number {
+  const baseTotal = item.foodPrice * item.qty;
+  const discounted = baseTotal * (1 - discountRate / 100);
+  const taxed = discounted * (1 + taxRate / 100);
+  return Math.round(taxed);
+}
+
 export function RecentSales() {
-	return (
-		<div className="space-y-8 w-full h-[400px] overflow-y-auto">
-			{salesData.map((sale) => (
-				<div key={sale.id} className="flex items-center">
-					<Avatar className="w-9 h-9">
-						<AvatarImage src={sale.avatar} alt="Avatar" />
-						<AvatarFallback>{sale.fallback}</AvatarFallback>
-					</Avatar>
-					<div className="space-y-1 ml-4">
-						<p className="font-medium text-sm leading-none">{sale.name}</p>
-						<p className="text-muted-foreground text-sm">{sale.email}</p>
-					</div>
-					<div className="ml-auto font-medium">{sale.amount}</div>
-				</div>
-			))}
-		</div>
-	);
+  return (
+    <div className="space-y-6 w-full h-[400px] overflow-y-auto">
+      {salesData.map((sale) => (
+        <div key={sale.receiptId} className="pb-4 border-b">
+          <p className="text-muted-foreground text-xs">
+            {new Date(sale.receiptDate).toLocaleString()} · Processed by {sale.processedBy}
+          </p>
+          {sale.items.map((item, index) => (
+            <div key={item.foodId + index} className="flex justify-between items-center mt-1">
+              <div className="text-sm">
+                <span className="font-medium">{item.foodName}</span>{" "}
+                <span className="text-muted-foreground text-xs">x{item.qty}</span>
+              </div>
+              <div className="font-medium text-sm">NPR {calculateTotal(item, sale.discountRate, sale.taxRate)}</div>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
 }

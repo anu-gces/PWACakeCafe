@@ -26,13 +26,13 @@ import { Route as HomeHelpImport } from './routes/home/help'
 import { Route as HomeEmployeeImport } from './routes/home/employee'
 import { Route as HomeEditMenuImport } from './routes/home/editMenu'
 import { Route as HomeDashboardImport } from './routes/home/dashboard'
+import { Route as HomeBillingImport } from './routes/home/billing'
 import { Route as HomeAccountImport } from './routes/home/account'
 
 // Create Virtual Routes
 
 const HomeStockLazyImport = createFileRoute('/home/stock')()
 const HomeCalendarLazyImport = createFileRoute('/home/calendar')()
-const HomeBillingLazyImport = createFileRoute('/home/billing')()
 
 // Create/Update Routes
 
@@ -84,12 +84,6 @@ const HomeCalendarLazyRoute = HomeCalendarLazyImport.update({
   getParentRoute: () => HomeRoute,
 } as any).lazy(() => import('./routes/home/calendar.lazy').then((d) => d.Route))
 
-const HomeBillingLazyRoute = HomeBillingLazyImport.update({
-  id: '/billing',
-  path: '/billing',
-  getParentRoute: () => HomeRoute,
-} as any).lazy(() => import('./routes/home/billing.lazy').then((d) => d.Route))
-
 const HomeWelcomeRoute = HomeWelcomeImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -133,6 +127,12 @@ const HomeDashboardRoute = HomeDashboardImport.update({
 } as any).lazy(() =>
   import('./routes/home/dashboard.lazy').then((d) => d.Route),
 )
+
+const HomeBillingRoute = HomeBillingImport.update({
+  id: '/billing',
+  path: '/billing',
+  getParentRoute: () => HomeRoute,
+} as any)
 
 const HomeAccountRoute = HomeAccountImport.update({
   id: '/account',
@@ -193,6 +193,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeAccountImport
       parentRoute: typeof HomeImport
     }
+    '/home/billing': {
+      id: '/home/billing'
+      path: '/billing'
+      fullPath: '/home/billing'
+      preLoaderRoute: typeof HomeBillingImport
+      parentRoute: typeof HomeImport
+    }
     '/home/dashboard': {
       id: '/home/dashboard'
       path: '/dashboard'
@@ -242,13 +249,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeWelcomeImport
       parentRoute: typeof HomeImport
     }
-    '/home/billing': {
-      id: '/home/billing'
-      path: '/billing'
-      fullPath: '/home/billing'
-      preLoaderRoute: typeof HomeBillingLazyImport
-      parentRoute: typeof HomeImport
-    }
     '/home/calendar': {
       id: '/home/calendar'
       path: '/calendar'
@@ -270,6 +270,7 @@ declare module '@tanstack/react-router' {
 
 interface HomeRouteChildren {
   HomeAccountRoute: typeof HomeAccountRoute
+  HomeBillingRoute: typeof HomeBillingRoute
   HomeDashboardRoute: typeof HomeDashboardRoute
   HomeEditMenuRoute: typeof HomeEditMenuRoute
   HomeEmployeeRoute: typeof HomeEmployeeRoute
@@ -277,13 +278,13 @@ interface HomeRouteChildren {
   HomeOrdersRoute: typeof HomeOrdersRoute
   HomeSettingsRoute: typeof HomeSettingsRoute
   HomeWelcomeRoute: typeof HomeWelcomeRoute
-  HomeBillingLazyRoute: typeof HomeBillingLazyRoute
   HomeCalendarLazyRoute: typeof HomeCalendarLazyRoute
   HomeStockLazyRoute: typeof HomeStockLazyRoute
 }
 
 const HomeRouteChildren: HomeRouteChildren = {
   HomeAccountRoute: HomeAccountRoute,
+  HomeBillingRoute: HomeBillingRoute,
   HomeDashboardRoute: HomeDashboardRoute,
   HomeEditMenuRoute: HomeEditMenuRoute,
   HomeEmployeeRoute: HomeEmployeeRoute,
@@ -291,7 +292,6 @@ const HomeRouteChildren: HomeRouteChildren = {
   HomeOrdersRoute: HomeOrdersRoute,
   HomeSettingsRoute: HomeSettingsRoute,
   HomeWelcomeRoute: HomeWelcomeRoute,
-  HomeBillingLazyRoute: HomeBillingLazyRoute,
   HomeCalendarLazyRoute: HomeCalendarLazyRoute,
   HomeStockLazyRoute: HomeStockLazyRoute,
 }
@@ -306,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/splashscreen': typeof SplashscreenRoute
   '/testingRoute': typeof TestingRouteRoute
   '/home/account': typeof HomeAccountRoute
+  '/home/billing': typeof HomeBillingRoute
   '/home/dashboard': typeof HomeDashboardRoute
   '/home/editMenu': typeof HomeEditMenuRoute
   '/home/employee': typeof HomeEmployeeRoute
@@ -313,7 +314,6 @@ export interface FileRoutesByFullPath {
   '/home/orders': typeof HomeOrdersRoute
   '/home/settings': typeof HomeSettingsRoute
   '/home/welcome': typeof HomeWelcomeRoute
-  '/home/billing': typeof HomeBillingLazyRoute
   '/home/calendar': typeof HomeCalendarLazyRoute
   '/home/stock': typeof HomeStockLazyRoute
 }
@@ -326,6 +326,7 @@ export interface FileRoutesByTo {
   '/splashscreen': typeof SplashscreenRoute
   '/testingRoute': typeof TestingRouteRoute
   '/home/account': typeof HomeAccountRoute
+  '/home/billing': typeof HomeBillingRoute
   '/home/dashboard': typeof HomeDashboardRoute
   '/home/editMenu': typeof HomeEditMenuRoute
   '/home/employee': typeof HomeEmployeeRoute
@@ -333,7 +334,6 @@ export interface FileRoutesByTo {
   '/home/orders': typeof HomeOrdersRoute
   '/home/settings': typeof HomeSettingsRoute
   '/home/welcome': typeof HomeWelcomeRoute
-  '/home/billing': typeof HomeBillingLazyRoute
   '/home/calendar': typeof HomeCalendarLazyRoute
   '/home/stock': typeof HomeStockLazyRoute
 }
@@ -347,6 +347,7 @@ export interface FileRoutesById {
   '/splashscreen': typeof SplashscreenRoute
   '/testingRoute': typeof TestingRouteRoute
   '/home/account': typeof HomeAccountRoute
+  '/home/billing': typeof HomeBillingRoute
   '/home/dashboard': typeof HomeDashboardRoute
   '/home/editMenu': typeof HomeEditMenuRoute
   '/home/employee': typeof HomeEmployeeRoute
@@ -354,7 +355,6 @@ export interface FileRoutesById {
   '/home/orders': typeof HomeOrdersRoute
   '/home/settings': typeof HomeSettingsRoute
   '/home/welcome': typeof HomeWelcomeRoute
-  '/home/billing': typeof HomeBillingLazyRoute
   '/home/calendar': typeof HomeCalendarLazyRoute
   '/home/stock': typeof HomeStockLazyRoute
 }
@@ -369,6 +369,7 @@ export interface FileRouteTypes {
     | '/splashscreen'
     | '/testingRoute'
     | '/home/account'
+    | '/home/billing'
     | '/home/dashboard'
     | '/home/editMenu'
     | '/home/employee'
@@ -376,7 +377,6 @@ export interface FileRouteTypes {
     | '/home/orders'
     | '/home/settings'
     | '/home/welcome'
-    | '/home/billing'
     | '/home/calendar'
     | '/home/stock'
   fileRoutesByTo: FileRoutesByTo
@@ -388,6 +388,7 @@ export interface FileRouteTypes {
     | '/splashscreen'
     | '/testingRoute'
     | '/home/account'
+    | '/home/billing'
     | '/home/dashboard'
     | '/home/editMenu'
     | '/home/employee'
@@ -395,7 +396,6 @@ export interface FileRouteTypes {
     | '/home/orders'
     | '/home/settings'
     | '/home/welcome'
-    | '/home/billing'
     | '/home/calendar'
     | '/home/stock'
   id:
@@ -407,6 +407,7 @@ export interface FileRouteTypes {
     | '/splashscreen'
     | '/testingRoute'
     | '/home/account'
+    | '/home/billing'
     | '/home/dashboard'
     | '/home/editMenu'
     | '/home/employee'
@@ -414,7 +415,6 @@ export interface FileRouteTypes {
     | '/home/orders'
     | '/home/settings'
     | '/home/welcome'
-    | '/home/billing'
     | '/home/calendar'
     | '/home/stock'
   fileRoutesById: FileRoutesById
@@ -466,6 +466,7 @@ export const routeTree = rootRoute
       "filePath": "home.tsx",
       "children": [
         "/home/account",
+        "/home/billing",
         "/home/dashboard",
         "/home/editMenu",
         "/home/employee",
@@ -473,7 +474,6 @@ export const routeTree = rootRoute
         "/home/orders",
         "/home/settings",
         "/home/welcome",
-        "/home/billing",
         "/home/calendar",
         "/home/stock"
       ]
@@ -489,6 +489,10 @@ export const routeTree = rootRoute
     },
     "/home/account": {
       "filePath": "home/account.tsx",
+      "parent": "/home"
+    },
+    "/home/billing": {
+      "filePath": "home/billing.tsx",
       "parent": "/home"
     },
     "/home/dashboard": {
@@ -517,10 +521,6 @@ export const routeTree = rootRoute
     },
     "/home/welcome": {
       "filePath": "home/welcome.tsx",
-      "parent": "/home"
-    },
-    "/home/billing": {
-      "filePath": "home/billing.lazy.tsx",
       "parent": "/home"
     },
     "/home/calendar": {

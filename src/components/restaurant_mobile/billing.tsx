@@ -1,80 +1,59 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { AddToCart } from "./editMenu";
 
-type Item = {
-  foodName: string;
-  quantity: number;
-  price: number;
-};
-
-type Order = {
-  orderId: string;
-  discountRate: number;
-  taxRate: number;
-  items: Item[];
-  totalAmount: number;
-  orderDate: string; // ISO string
-  processedBy: { name: string };
-};
-
-const orders = [
+export const columns: ColumnDef<
+  AddToCart & {
+    processedBy: string;
+    receiptId: string;
+    receiptDate: string;
+    subTotalAmount: number;
+    totalAmount: number;
+  }
+>[] = [
   {
-    orderId: "order123",
-    discountRate: 0.1,
-    taxRate: 0.13,
-    items: [
-      { foodName: "Waffle Cone", quantity: 2, price: 5 },
-      { foodName: "Blueberry Cheesecake", quantity: 1, price: 6 },
-    ],
-    totalAmount: 15.7,
-    orderDate: "2025-05-06T12:00:00Z",
-    processedBy: "John Doe",
+    accessorKey: "receiptId",
+    id: "receiptId",
+    header: "Receipt ID",
   },
   {
-    orderId: "order456",
-    discountRate: 0.15,
-    taxRate: 0.1,
-    items: [
-      { foodName: "Pasta", quantity: 1, price: 8 },
-      { foodName: "Garlic Bread", quantity: 2, price: 4 },
-    ],
-    totalAmount: 18.2,
-    orderDate: "2025-05-06T14:00:00Z",
-    processedBy: "Jane Smith",
-  },
-];
-
-export const columns: ColumnDef<Order>[] = [
-  {
-    accessorKey: "orderId",
-    id: "Order ID",
-    header: "Order ID",
-  },
-  {
-    accessorKey: "discountRate",
-    id: "Discount Rate",
-    header: "Discount Rate",
-    cell: ({ getValue }) => `${getValue<number>() * 100}%`, // Format the value as a percentage
-  },
-  {
-    accessorKey: "taxRate",
-    id: "Tax Rate",
-    header: "Tax Rate",
-    cell: ({ getValue }) => `${getValue<number>() * 100}%`, // Format the value as a percentage
-  },
-  {
-    accessorKey: "totalAmount",
-    id: "Total Amount",
-    header: "Total Amount",
+    accessorKey: "subTotalAmount",
+    id: "subTotalAmount",
+    header: "Sub Total Amount",
     cell: ({ getValue }) => `Rs. ${getValue<number>().toFixed(2)}`, // Format the value with "Rs." and two decimal places
   },
   {
-    accessorKey: "orderDate",
-    id: "Order Date",
-    header: "Order Date",
+    accessorKey: "discountRate",
+    id: "discountRate",
+    header: "Discount Rate",
+    cell: ({ getValue }) => `${getValue<number>()}%`, // Format the value as a percentage
   },
   {
-    accessorKey: "processedBy.name",
-    id: "Processed By",
+    accessorKey: "taxRate",
+    id: "taxRate",
+    header: "Tax Rate",
+    cell: ({ getValue }) => `${getValue<number>()}%`, // Format the value as a percentage
+  },
+
+  {
+    accessorKey: "totalAmount",
+    id: "totalAmount",
+    header: "Total Amount",
+    cell: ({ getValue }) => `Rs. ${getValue<number>().toFixed(2)}`, // Format the value with "Rs." and two decimal places
+  },
+
+  {
+    accessorKey: "receiptDate",
+    id: "receiptDate",
+    header: "Receipt Date",
+    cell: ({ getValue }) => {
+      const date = getValue<string>();
+      return date ? format(new Date(date), "dd MMM yyyy, hh:mm a") : "N/A"; // Format the date
+    },
+  },
+  {
+    accessorKey: "processedBy",
+    id: "processedBy",
     header: "Processed By",
   },
 ];

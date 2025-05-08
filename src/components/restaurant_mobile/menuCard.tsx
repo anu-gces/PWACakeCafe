@@ -19,7 +19,7 @@ import { uploadMenuItemImage } from "@/firebase/firebase_storage";
 import { deleteFoodItem, editFoodItem } from "@/firebase/firestore";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Form, Formik } from "formik";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -30,20 +30,41 @@ type MenuCardProps = {
   handleAddToCart: (food: FoodItemProps) => void;
 };
 
-const snapThreshold = -35;
+const snapThresholdLeft = -50;
+const snapThresholdRight = 50;
 
 export function MenuCard({ food, handleAddToCart }: MenuCardProps) {
   const x = useMotionValue(0);
+  const snapState = useRef<"center" | "left" | "right">("center");
 
   const handleDragEnd = (_: any, info: PanInfo) => {
     const offset = info.offset.x;
 
-    const finalX = offset < snapThreshold ? -70 : 0;
-    animate(x, finalX, {
-      type: "spring",
-      stiffness: 500,
-      damping: 30,
-    });
+    if (snapState.current === "left" && offset > 0) {
+      // Trying to go right from left: snap to center first
+      snapState.current = "center";
+      animate(x, 0, { type: "spring", stiffness: 700, damping: 25 });
+      return;
+    }
+
+    if (snapState.current === "right" && offset < 0) {
+      // Trying to go left from right: snap to center first
+      snapState.current = "center";
+      animate(x, 0, { type: "spring", stiffness: 700, damping: 25 });
+      return;
+    }
+
+    // Normal snapping
+    if (offset < snapThresholdLeft) {
+      snapState.current = "left";
+      animate(x, -70, { type: "spring", stiffness: 500, damping: 30 });
+    } else if (offset > snapThresholdRight) {
+      snapState.current = "right";
+      animate(x, 70, { type: "spring", stiffness: 500, damping: 30 });
+    } else {
+      snapState.current = "center";
+      animate(x, 0, { type: "spring", stiffness: 500, damping: 30 });
+    }
   };
   return (
     <>
@@ -57,7 +78,7 @@ export function MenuCard({ food, handleAddToCart }: MenuCardProps) {
         <motion.div
           drag="x"
           dragDirectionLock
-          dragConstraints={{ left: -70, right: 0 }}
+          dragConstraints={{ left: -70, right: 70 }}
           dragTransition={{ bounceStiffness: 500, bounceDamping: 15 }}
           style={{ x }}
           dragElastic={0.2}
@@ -80,6 +101,12 @@ export function MenuCard({ food, handleAddToCart }: MenuCardProps) {
             </div>
           </div>
         </motion.div>
+        <div className="top-0 left-0 z-0 absolute flex items-center h-full">
+          <div className="flex justify-center items-center border w-full h-full">
+            <EditDrawer food={food} />
+            <DeleteDrawer food={food} />
+          </div>
+        </div>
       </div>
     </>
   );
