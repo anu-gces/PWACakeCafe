@@ -21,7 +21,6 @@ import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as HomeWelcomeImport } from './routes/home/welcome'
 import { Route as HomeSettingsImport } from './routes/home/settings'
-import { Route as HomeOrdersImport } from './routes/home/orders'
 import { Route as HomeHelpImport } from './routes/home/help'
 import { Route as HomeEmployeeImport } from './routes/home/employee'
 import { Route as HomeEditMenuImport } from './routes/home/editMenu'
@@ -93,12 +92,6 @@ const HomeWelcomeRoute = HomeWelcomeImport.update({
 const HomeSettingsRoute = HomeSettingsImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => HomeRoute,
-} as any)
-
-const HomeOrdersRoute = HomeOrdersImport.update({
-  id: '/orders',
-  path: '/orders',
   getParentRoute: () => HomeRoute,
 } as any)
 
@@ -228,13 +221,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeHelpImport
       parentRoute: typeof HomeImport
     }
-    '/home/orders': {
-      id: '/home/orders'
-      path: '/orders'
-      fullPath: '/home/orders'
-      preLoaderRoute: typeof HomeOrdersImport
-      parentRoute: typeof HomeImport
-    }
     '/home/settings': {
       id: '/home/settings'
       path: '/settings'
@@ -275,7 +261,6 @@ interface HomeRouteChildren {
   HomeEditMenuRoute: typeof HomeEditMenuRoute
   HomeEmployeeRoute: typeof HomeEmployeeRoute
   HomeHelpRoute: typeof HomeHelpRoute
-  HomeOrdersRoute: typeof HomeOrdersRoute
   HomeSettingsRoute: typeof HomeSettingsRoute
   HomeWelcomeRoute: typeof HomeWelcomeRoute
   HomeCalendarLazyRoute: typeof HomeCalendarLazyRoute
@@ -289,7 +274,6 @@ const HomeRouteChildren: HomeRouteChildren = {
   HomeEditMenuRoute: HomeEditMenuRoute,
   HomeEmployeeRoute: HomeEmployeeRoute,
   HomeHelpRoute: HomeHelpRoute,
-  HomeOrdersRoute: HomeOrdersRoute,
   HomeSettingsRoute: HomeSettingsRoute,
   HomeWelcomeRoute: HomeWelcomeRoute,
   HomeCalendarLazyRoute: HomeCalendarLazyRoute,
@@ -311,7 +295,6 @@ export interface FileRoutesByFullPath {
   '/home/editMenu': typeof HomeEditMenuRoute
   '/home/employee': typeof HomeEmployeeRoute
   '/home/help': typeof HomeHelpRoute
-  '/home/orders': typeof HomeOrdersRoute
   '/home/settings': typeof HomeSettingsRoute
   '/home/welcome': typeof HomeWelcomeRoute
   '/home/calendar': typeof HomeCalendarLazyRoute
@@ -331,7 +314,6 @@ export interface FileRoutesByTo {
   '/home/editMenu': typeof HomeEditMenuRoute
   '/home/employee': typeof HomeEmployeeRoute
   '/home/help': typeof HomeHelpRoute
-  '/home/orders': typeof HomeOrdersRoute
   '/home/settings': typeof HomeSettingsRoute
   '/home/welcome': typeof HomeWelcomeRoute
   '/home/calendar': typeof HomeCalendarLazyRoute
@@ -352,7 +334,6 @@ export interface FileRoutesById {
   '/home/editMenu': typeof HomeEditMenuRoute
   '/home/employee': typeof HomeEmployeeRoute
   '/home/help': typeof HomeHelpRoute
-  '/home/orders': typeof HomeOrdersRoute
   '/home/settings': typeof HomeSettingsRoute
   '/home/welcome': typeof HomeWelcomeRoute
   '/home/calendar': typeof HomeCalendarLazyRoute
@@ -374,7 +355,6 @@ export interface FileRouteTypes {
     | '/home/editMenu'
     | '/home/employee'
     | '/home/help'
-    | '/home/orders'
     | '/home/settings'
     | '/home/welcome'
     | '/home/calendar'
@@ -393,7 +373,6 @@ export interface FileRouteTypes {
     | '/home/editMenu'
     | '/home/employee'
     | '/home/help'
-    | '/home/orders'
     | '/home/settings'
     | '/home/welcome'
     | '/home/calendar'
@@ -412,7 +391,6 @@ export interface FileRouteTypes {
     | '/home/editMenu'
     | '/home/employee'
     | '/home/help'
-    | '/home/orders'
     | '/home/settings'
     | '/home/welcome'
     | '/home/calendar'
@@ -471,7 +449,6 @@ export const routeTree = rootRoute
         "/home/editMenu",
         "/home/employee",
         "/home/help",
-        "/home/orders",
         "/home/settings",
         "/home/welcome",
         "/home/calendar",
@@ -509,10 +486,6 @@ export const routeTree = rootRoute
     },
     "/home/help": {
       "filePath": "home/help.tsx",
-      "parent": "/home"
-    },
-    "/home/orders": {
-      "filePath": "home/orders.tsx",
       "parent": "/home"
     },
     "/home/settings": {
