@@ -16,7 +16,9 @@ import {
   query,
   setDoc,
   updateDoc,
+  deleteDoc,
   where,
+  onSnapshot,
 } from "firebase/firestore";
 import { app } from "./firebase";
 import { deleteMenuItemImage } from "./firebase_storage";
@@ -127,6 +129,40 @@ export async function getCurrentUserDocumentDetails(): Promise<DocumentData | nu
   }
 }
 
+export async function deleteUser(uidToDelete: string): Promise<void> {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error("No user is currently logged in");
+  }
+
+  if (currentUser.uid === uidToDelete) {
+    throw new Error("You cannot delete your own account");
+  }
+
+  const userRef = doc(db, "users", uidToDelete);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    throw new Error("User document does not exist");
+  }
+
+  const userData = userDoc.data();
+
+  if (userData.role.toLowerCase() === "admin" || userData.role.toLowerCase() === "owner") {
+    throw new Error("Admin or Owner accounts cannot be deleted");
+  }
+
+  try {
+    await deleteDoc(userRef);
+    console.log(`User with UID ${uidToDelete} has been deleted`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw new Error("Failed to delete user");
+  }
+}
+
 export async function getKanbanCardDocument() {
   const cardRef = doc(db, "kanban", "allItems");
   const cardSnap = await getDoc(cardRef);
@@ -138,24 +174,31 @@ export async function getKanbanCardDocument() {
   }
 }
 
-export async function enterKanbanCardDocument(
-  items: Array<{
-    title: string;
-    id: string;
-    column: "inStock" | "runningLow" | "outOfStock" | "restocked";
-  }>
-) {
+export async function enterKanbanCardDocument(items: CardType[]) {
   const auth = getAuth();
   const user = auth.currentUser;
 
   if (user) {
     const itemsWithMarker = items.map((item) => ({
       ...item,
-      uid: user.displayName,
     })); // Add uid to each item
     const cardRef = doc(db, "kanban", "allItems");
     await setDoc(cardRef, { items: itemsWithMarker }, { merge: true }); // Store the items with uid
   }
+}
+
+export function listenToKanbanCardDocument(callback: (items: CardType[]) => void) {
+  const unsub = onSnapshot(doc(db, "kanban", "allItems"), (docSnap) => {
+    if (docSnap.exists()) {
+      const items: CardType[] = docSnap.data().items || [];
+
+      callback(items); // Pass the entire items array back
+    } else {
+      callback([]); // No data = empty array
+    }
+  });
+
+  return unsub; // Let the component handle cleanup
 }
 
 export async function getCalendarEventDocument(): Promise<calendarEventProps[]> {
@@ -308,6 +351,7 @@ export async function deleteFoodItem(foodIdToDelete: string) {
 }
 
 import { format } from "date-fns";
+import { CardType } from "@/components/ui/kanbanBoard";
 
 export async function createOrderDocument(orderDetails: AddToCart) {
   const auth = getAuth();

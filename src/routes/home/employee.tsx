@@ -45,7 +45,7 @@ export const Route = createFileRoute("/home/employee")({
           columns={columns}
           data={users || []}
           filterColumnId="firstName"
-          visibleColumns={["actions", "firstName", "phoneNumber"]}
+          visibleColumns={["photo", "actions", "firstName", "phoneNumber"]}
         />
       </>
     );

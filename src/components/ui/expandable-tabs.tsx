@@ -5,6 +5,8 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import * as React from "react";
+import { listenToKanbanCardDocument } from "@/firebase/firestore";
+import { toast } from "sonner";
 
 interface Tab {
   title: string;
@@ -51,6 +53,8 @@ const transition = { delay: 0.1, type: "spring", bounce: 0, duration: 0.6 };
 
 export function ExpandableTabs({ tabs, className, activeColor = "text-primary", onChange }: ExpandableTabsProps) {
   const [selected, setSelected] = React.useState<number | null>(null);
+  const [notificationCount, setNotificationCount] = React.useState(0);
+
   const navigate = useNavigate({ from: "/home" });
   const currentLocation = useLocation();
 
@@ -75,6 +79,55 @@ export function ExpandableTabs({ tabs, className, activeColor = "text-primary", 
     }
   }, [tabs, currentLocation]);
 
+  // React.useEffect(() => {
+  //   const unsub = listenToKanbanCardDocument((items) => {
+  //     // Filter items for runningLow and outOfStock columns
+  //     const count = items.filter((item) => item.column === "runningLow" || item.column === "outOfStock").length;
+
+  //     setNotificationCount(count); // Update the notification count
+  //   });
+
+  //   return () => unsub(); // Cleanup on unmount
+  // }, []);
+
+  React.useEffect(() => {
+    const unsub = listenToKanbanCardDocument((items) => {
+      // Filter items for runningLow and outOfStock columns
+      const count = items.filter((item) => item.column === "runningLow" || item.column === "outOfStock").length;
+
+      setNotificationCount(count); // Update the notification count
+
+      // Check for the latest updatedAt timestamp
+      const THRESHOLD_MS = 5000; // 5 seconds threshold
+      const now = new Date().getTime();
+
+      items.forEach((item) => {
+        const updatedAt = new Date(item.updatedAt).getTime();
+        if (now - updatedAt <= THRESHOLD_MS) {
+          toast(
+            <div className="flex items-start gap-3">
+              <span
+                className={`flex-shrink-0 mt-auto mb-auto w-2 h-2 rounded-full ${
+                  item.column === "outOfStock" ? "bg-red-500" : "bg-yellow-400"
+                }`}
+              />
+              <div>
+                <p className="font-semibold text-base">{item.title}</p>
+                <p className="text-muted-foreground text-sm">
+                  Marked <span className="font-medium">{item.column}</span> by{" "}
+                  <span className="font-medium">{item.displayName}</span>
+                </p>
+                <span className="text-muted-foreground text-xs">Just now</span>
+              </div>
+            </div>
+          );
+        }
+      });
+    });
+
+    return () => unsub(); // Cleanup on unmount
+  }, []);
+
   const Separator = () => <div className="mx-1 bg-border w-[1.2px] h-[24px]" aria-hidden="true" />;
 
   return (
@@ -94,7 +147,7 @@ export function ExpandableTabs({ tabs, className, activeColor = "text-primary", 
             custom={selected === index}
             onClick={() => {
               handleSelect(index);
-              navigate({ to: tab.to }); // <- you'll need to provide `to` inside your tab item
+              navigate({ to: tab.to });
             }}
             transition={transition}
             className={cn(
@@ -104,7 +157,14 @@ export function ExpandableTabs({ tabs, className, activeColor = "text-primary", 
                 : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
-            <Icon size={24} />
+            <div className="relative">
+              {tab.title === "Notifications" && notificationCount > 0 && (
+                <div className="-top-1 -left-2 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-white text-xs">
+                  {notificationCount}
+                </div>
+              )}
+              <Icon size={24} />
+            </div>
             <AnimatePresence initial={false}>
               {selected === index && (
                 <motion.span

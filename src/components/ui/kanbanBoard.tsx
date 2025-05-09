@@ -9,13 +9,19 @@ import { toast } from "sonner";
 //@ts-ignore
 import { enableDragDropTouch } from "@/lib/drag-drop-touch.esm.min.js";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { auth } from "@/firebase/firebase";
 
 type ColumnType = "inStock" | "runningLow" | "outOfStock" | "restocked";
 
-type CardType = {
+export type CardType = {
   title: string;
   id: string;
   column: ColumnType;
+  uid: string;
+  displayName: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export function KanbanBoard() {
@@ -36,6 +42,8 @@ export function KanbanBoard() {
 
   useEffect(() => {
     if (kanbanCards) {
+      console.log("kanbanCards", kanbanCards);
+      // Set the initial state of cards
       setCards(kanbanCards);
     }
   }, [kanbanCards]);
@@ -113,7 +121,7 @@ export function KanbanBoard() {
           onClick={saveCards} // Save cards when button is clicked
         >
           <SaveIcon color="#ffffff" />
-          Save
+          {enterKanbanCardMutation.isPending ? " Saving..." : "Save Kanban Cards"}
         </Button>
 
         <KanbanDelete setCards={setCards} />
@@ -153,6 +161,17 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
 
       let cardToTransfer = copy.find((c) => c.id === cardId);
       if (!cardToTransfer) return;
+
+      //UPDATE METADATA WHEN EDIT
+      cardToTransfer = {
+        ...cardToTransfer,
+        column,
+        uid: auth.currentUser?.uid || "",
+        displayName: auth.currentUser?.displayName || "",
+        email: auth.currentUser?.email || "",
+        updatedAt: new Date().toISOString(),
+      };
+
       cardToTransfer = { ...cardToTransfer, column };
 
       copy = copy.filter((c) => c.id !== cardId);
@@ -361,6 +380,11 @@ const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
       column,
       title: text.trim(),
       id: Math.random().toString(),
+      uid: auth.currentUser?.uid || "",
+      displayName: auth.currentUser?.displayName || "",
+      email: auth.currentUser?.email || "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     setCards((pv) => [...pv, newCard]);

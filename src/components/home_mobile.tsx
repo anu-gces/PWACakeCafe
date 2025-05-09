@@ -110,9 +110,6 @@ export function Home() {
     };
   }, [wasOffline]);
 
-  const splash = document.querySelector(".splash-container");
-  if (splash) splash.remove();
-
   return (
     <div className="flex flex-col justify-between h-[100dvh]">
       <div className="flex justify-between items-center bg-background shadow-md dark:shadow-2xl p-4 border-b border-border">
@@ -148,20 +145,21 @@ export function Home() {
                     <UserIcon className="w-5 h-5" />
                     <span>Profile Settings</span>
                   </Link>
-
-                  <Link
-                    to="/home/employee"
-                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
-                  >
-                    <UsersIcon className="w-5 h-5" />
-                    <span>Employee Management</span>
-                  </Link>
-
+                  {(user?.role === "admin" || user?.role === "owner") && (
+                    <Link
+                      to="/home/employee"
+                      className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
+                    >
+                      <UsersIcon className="w-5 h-5" />
+                      <span>Employee Management</span>
+                    </Link>
+                  )}
                   <Link
                     to="/home/dashboard"
                     className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
                   >
                     <BellIcon className="w-5 h-5" />
+
                     <span>Notifications</span>
                   </Link>
 
