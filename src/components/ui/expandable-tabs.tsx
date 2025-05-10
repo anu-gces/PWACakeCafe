@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import * as React from "react";
 import { listenToKanbanCardDocument } from "@/firebase/firestore";
 import { toast } from "sonner";
+import { auth } from "@/firebase/firebase";
 
 interface Tab {
   title: string;
@@ -102,36 +103,42 @@ export function ExpandableTabs({ tabs, className, activeColor = "text-primary", 
       const now = new Date().getTime();
 
       items.forEach((item) => {
+        if (item.column !== "runningLow" && item.column !== "outOfStock") return;
+
         const updatedAt = new Date(item.updatedAt).getTime();
-        if (now - updatedAt <= THRESHOLD_MS) {
+        if (now - updatedAt <= THRESHOLD_MS && auth.currentUser?.uid !== item.uid) {
           toast(
-            <div className="flex items-start gap-3">
-              <span
-                className={`flex-shrink-0 mt-auto mb-auto w-2 h-2 rounded-full ${
-                  item.column === "outOfStock" ? "bg-red-500" : "bg-yellow-400"
-                }`}
-              />
-              <div>
-                <p className="font-semibold text-base">{item.title}</p>
-                <p className="text-muted-foreground text-sm">
-                  Marked <span className="font-medium">{item.column}</span> by{" "}
-                  <span className="font-medium">{item.displayName}</span>
-                </p>
-                <span className="text-muted-foreground text-xs">Just now</span>
+            <div className="flex justify-between items-center gap-3">
+              <div className="flex items-center gap-3">
+                <span
+                  className={`flex-shrink-0 w-2 h-2 rounded-full ${
+                    item.column === "outOfStock" ? "bg-red-500" : "bg-yellow-400"
+                  }`}
+                />
+                <div>
+                  <p className="font-semibold text-base">{item.title}</p>
+                  <p className="text-muted-foreground text-sm">
+                    Marked <span className="font-medium">{item.column}</span> by{" "}
+                    <span className="font-medium">{item.displayName}</span>
+                  </p>
+                </div>
               </div>
+              <span className="text-muted-foreground text-xs whitespace-nowrap">Just now</span>
             </div>
           );
         }
       });
     });
 
-    return () => unsub(); // Cleanup on unmount
+    return () => unsub();
   }, []);
 
   const Separator = () => <div className="mx-1 bg-border w-[1.2px] h-[24px]" aria-hidden="true" />;
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2 rounded-2xl border bg-background p-1 shadow-sm", className)}>
+    <div
+      className={cn("flex flex-no-wrap items-center gap-2 rounded-2xl border bg-background p-1 shadow-sm", className)}
+    >
       {tabs.map((tab, index) => {
         if (tab.type === "separator") {
           return <Separator key={`separator-${index}`} />;
@@ -159,9 +166,13 @@ export function ExpandableTabs({ tabs, className, activeColor = "text-primary", 
           >
             <div className="relative">
               {tab.title === "Notifications" && notificationCount > 0 && (
-                <div className="-top-1 -left-2 absolute flex justify-center items-center bg-red-500 rounded-full w-4 h-4 text-white text-xs">
-                  {notificationCount}
-                </div>
+                <>
+                  <span className="-top-1 -left-2 absolute bg-rose-400 opacity-75 rounded-full w-4 h-4 animate-ping"></span>
+
+                  <div className="-top-1 -left-2 absolute flex justify-center items-center bg-rose-500 rounded-full w-4 h-4 text-white text-xs">
+                    {notificationCount}
+                  </div>
+                </>
               )}
               <Icon size={24} />
             </div>

@@ -117,11 +117,11 @@ export function KanbanBoard() {
 
       <div className="flex flex-col flex-1/5 gap-6 bg-muted dark:bg-background rounded-lg w-full h-full overflow-hidden text-card-foreground">
         <Button
-          className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-background text-sm transition-opacity duration-500"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary text-sm transition-opacity duration-500"
           onClick={saveCards} // Save cards when button is clicked
         >
           <SaveIcon color="#ffffff" />
-          {enterKanbanCardMutation.isPending ? " Saving..." : "Save Kanban Cards"}
+          {enterKanbanCardMutation.isPending ? " Saving..." : "Save"}
         </Button>
 
         <KanbanDelete setCards={setCards} />

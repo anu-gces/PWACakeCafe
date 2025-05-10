@@ -42,20 +42,20 @@ const tabs: TabItem[] = [
     icon: UtensilsIcon,
     to: '/home/editMenu?category="appetizers"',
   },
+  { title: "Notifications", icon: BellIcon, to: "/home/notifications" },
+  { title: "Stocks", icon: PackageOpenIcon, to: "/home/stock" },
+  { type: "separator" },
   {
     title: "History",
     icon: HistoryIcon,
     to: "/home/billing",
   },
-  { title: "Notifications", icon: BellIcon, to: "/home/notifications" },
-  { title: "Stocks", icon: PackageOpenIcon, to: "/home/stock" },
-  { type: "separator" },
-  { title: "Calendar", icon: CalendarIcon, to: "/home/calendar" },
   {
     title: "Dashboard",
     icon: DollarSignIcon,
     to: "/home/dashboard?tab=overview",
   },
+  { title: "Calendar", icon: CalendarIcon, to: "/home/calendar" },
 ];
 
 export function Home() {

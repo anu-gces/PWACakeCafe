@@ -15,13 +15,21 @@ import {
 import type { DocumentData } from "firebase/firestore";
 import { Form, Formik } from "formik";
 import React from "react";
-import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "./ui/drawer";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "./ui/drawer";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteUser } from "@/firebase/firestore";
+import { deleteUser, editUserDetails } from "@/firebase/firestore";
 
 export type User = {
   uid: string;
@@ -59,11 +67,7 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
     header: "Photo",
     cell: ({ row }) => (
       <Avatar className="w-10 h-10 cursor-pointer">
-        <AvatarImage
-          className="object-cover"
-          alt="Profile Picture"
-          src={row.original.profilePicture || row.original.photoURL}
-        />
+        <AvatarImage alt="Profile Picture" src={row.original.profilePicture || row.original.photoURL} />
         <AvatarFallback>
           <User2 />
         </AvatarFallback>
@@ -146,6 +150,18 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
       };
 
       const queryClient = useQueryClient();
+      const editMutation = useMutation({
+        mutationFn: editUserDetails, // Use your actual deleteUser function
+
+        onError: (error: any) => {
+          toast.error(`Error: ${error.message || "Something went wrong"}`);
+        },
+        onSuccess: () => {
+          toast.success("User Details Updated Successfully!");
+          setIsDeleteDrawerOpen(false); // Close the drawer after success
+          queryClient.invalidateQueries({ queryKey: ["usersManagement"] }); // Invalidate the users query to refresh the data
+        },
+      });
       const deleteMutation = useMutation({
         mutationFn: deleteUser, // Use your actual deleteUser function
 
@@ -170,7 +186,9 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.uid)}>Copy user ID</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.phoneNumber)}>
+                Copy Phone Number
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setIsDrawerOpen(true)}>Edit User Details</DropdownMenuItem>
               <DropdownMenuItem
@@ -193,8 +211,8 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
                 initialValues={initialValues}
                 validationSchema={UserValidationSchema}
                 onSubmit={(values, actions) => {
-                  console.log("nerd");
-                  console.log(values);
+                  console.log("object", values);
+                  editMutation.mutate(values);
                   actions.setSubmitting(false);
                   setIsDrawerOpen(false);
                 }}
@@ -351,6 +369,11 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
                     </div>
                     <DrawerFooter>
                       <Button type="submit">Submit</Button>
+                      <DrawerClose>
+                        <Button variant="outline" className="w-full" onClick={() => setIsDrawerOpen(false)}>
+                          Cancel
+                        </Button>
+                      </DrawerClose>
                     </DrawerFooter>
                   </Form>
                 )}
@@ -369,11 +392,10 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
                 <Button
                   className="ml-2"
                   onClick={() => {
-                    console.log("nerd");
                     deleteMutation.mutate(user.uid);
                   }}
                 >
-                  Deleteeeee
+                  Delete
                 </Button>
                 <Button variant="outline" onClick={() => setIsDeleteDrawerOpen(false)}>
                   Cancel

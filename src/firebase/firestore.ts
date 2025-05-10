@@ -129,6 +129,65 @@ export async function getCurrentUserDocumentDetails(): Promise<DocumentData | nu
   }
 }
 
+export async function editUserDetails(updatedDetails: {
+  uid: string; // Include uid as part of the updatedDetails object
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  department?: string;
+  role?: string;
+}): Promise<void> {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error("No user is currently logged in");
+  }
+
+  // Get the current user's document
+  const currentUserRef = doc(db, "users", currentUser.uid);
+  const currentUserDoc = await getDoc(currentUserRef);
+
+  if (!currentUserDoc.exists()) {
+    throw new Error("Current user document does not exist");
+  }
+
+  const currentUserData = currentUserDoc.data();
+
+  // Check if the current user has the required role
+  if (currentUserData.role.toLowerCase() !== "admin" && currentUserData.role.toLowerCase() !== "owner") {
+    throw new Error("Only admins or owners can edit user details");
+  }
+
+  // Extract uid from updatedDetails
+  const { uid, ...detailsToUpdate } = updatedDetails;
+
+  // Get the target user's document
+  const userRef = doc(db, "users", uid);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    throw new Error("User document does not exist");
+  }
+
+  const userData = userDoc.data();
+
+  // Merge the updated details with the existing data
+  const updatedUserData = {
+    ...userData, // Preserve existing data
+    ...detailsToUpdate, // Overwrite with updated details
+  };
+
+  try {
+    // Update the user document with the merged data
+    await updateDoc(userRef, updatedUserData);
+    console.log(`User with UID ${uid} has been updated successfully.`);
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    throw new Error("Failed to update user details.");
+  }
+}
+
 export async function deleteUser(uidToDelete: string): Promise<void> {
   const auth = getAuth();
   const currentUser = auth.currentUser;
