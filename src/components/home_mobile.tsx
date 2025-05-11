@@ -34,7 +34,6 @@ import { ExpandableTabs, type TabItem } from "./ui/expandable-tabs";
 import { Separator } from "./ui/separator";
 import { ModeToggle } from "./ui/themeToggle";
 import fallbackAvatar from "@/assets/fallbackAvatar.png";
-import ReloadPrompt from "./reloadPrompt";
 
 const tabs: TabItem[] = [
   {
@@ -187,8 +186,6 @@ export function Home() {
             </Drawer>
           )}
         </div>
-
-        <ReloadPrompt />
 
         {/* <Drawer direction="right">
           <DrawerTrigger>
