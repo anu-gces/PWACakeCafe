@@ -1,8 +1,6 @@
-import { DataTable } from "@/components/ui/dataTable_billing";
 import { createFileRoute } from "@tanstack/react-router";
-import { columns } from "@/components/restaurant_mobile/billing";
 import { getAllOrders } from "@/firebase/firestore";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 
 // const orders = [
 //   {
@@ -33,37 +31,6 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/home/billing")({
   loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(getAllOrdersQueryOptions()),
-
-  component: () => {
-    const { data: rawOrders } = useSuspenseQuery({
-      queryKey: ["getAllOrders"], // Use the same query key
-      queryFn: getAllOrders, // Use the same query function
-    });
-
-    const orders = rawOrders.map((order) => {
-      const subTotalAmount = order.items.reduce((sum, item) => sum + item.foodPrice * item.qty, 0);
-      const discountAmount = subTotalAmount * (order.discountRate / 100);
-      const taxAmount = (subTotalAmount - discountAmount) * (order.taxRate / 100);
-      const totalAmount = subTotalAmount - discountAmount + taxAmount;
-
-      return {
-        ...order,
-        subTotalAmount, // Add the total to the order object
-        totalAmount,
-      };
-    });
-
-    return (
-      <>
-        <DataTable
-          columns={columns}
-          data={orders || []}
-          filterColumnId="receiptDate"
-          visibleColumns={["receiptId", "totalAmount", "receiptDate", "processedBy"]}
-        />
-      </>
-    );
-  },
 });
 
 export const getAllOrdersQueryOptions = () =>

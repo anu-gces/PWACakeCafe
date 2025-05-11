@@ -1,11 +1,6 @@
-import { columns } from "@/components/employee";
-import { DataTable } from "@/components/ui/dataTable";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { getAllUsers, getCurrentUserDocumentDetails } from "@/firebase/firestore";
-
-import { useLoadingSpinner } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { getCurrentUserDocumentDetails } from "@/firebase/firestore";
 
 // const dummyUsers: any = [
 // 	{
@@ -23,33 +18,6 @@ import { useQuery } from "@tanstack/react-query";
 // ];
 
 export const Route = createFileRoute("/home/employee")({
-  component: () => {
-    const {
-      data: users,
-      isLoading,
-      error,
-    } = useQuery({
-      queryKey: ["usersManagement"],
-      queryFn: getAllUsers,
-      staleTime: Number.POSITIVE_INFINITY,
-      gcTime: Number.POSITIVE_INFINITY,
-    });
-
-    useLoadingSpinner(isLoading);
-    if (error) return <div>Error occurred</div>;
-
-    // Use the user data in your component
-    return (
-      <>
-        <DataTable
-          columns={columns}
-          data={users || []}
-          filterColumnId="firstName"
-          visibleColumns={["photo", "actions", "firstName", "phoneNumber"]}
-        />
-      </>
-    );
-  },
   beforeLoad: async () => {
     const user = await getCurrentUserDocumentDetails();
 

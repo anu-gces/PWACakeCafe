@@ -10,12 +10,16 @@ import { toast } from "sonner";
 import { enableDragDropTouch } from "@/lib/drag-drop-touch.esm.min.js";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { auth } from "@/firebase/firebase";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
+import { kanbanCategory } from "../stock";
+import { useSearch } from "@tanstack/react-router";
 
 type ColumnType = "inStock" | "runningLow" | "outOfStock" | "restocked";
 
 export type CardType = {
   title: string;
   id: string;
+  category: kanbanCategory;
   column: ColumnType;
   uid: string;
   displayName: string;
@@ -83,7 +87,7 @@ export function KanbanBoard() {
   }
 
   return (
-    <div className="flex gap-3 bg-muted dark:bg-background shadow-sm p-2 border rounded-lg w-full h-full overflow-y-auto text-card-foreground">
+    <div className="flex gap-3 bg-muted dark:bg-background shadow-sm p-2 rounded-lg w-full h-full overflow-y-auto text-card-foreground">
       <div className="flex flex-wrap landscape:flex-nowrap flex-[80%] landscape:gap-3 landscape:w-full landscape:h-full">
         <KanbanColumn
           title="In Stock"
@@ -140,6 +144,8 @@ type KanbanColumnProps = {
 
 const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanColumnProps) => {
   const [active, setActive] = useState(false);
+  const search = useSearch({ from: "/home/stock" });
+  const category = search.category;
 
   const handleDragStart = (e: DragEvent, card: CardType) => {
     e.dataTransfer.setData("cardId", card.id);
@@ -255,7 +261,9 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
     <div className="flex flex-col flex-[50%] landscape:w-full max-w-[50%] h-[50%] landscape:h-full overflow-x-hidden overflow-y-scroll">
       <div className="flex justify-between items-center mb-3 p-2 px-3 border-b-2">
         <h3 className={`font-medium ${headingColor}`}>{title}</h3>
-        <span className="rounded text-neutral-400 text-sm">{filteredCards.length}</span>
+        <span className="rounded text-neutral-400 text-sm">
+          {filteredCards.filter((c) => c.category === category).length}
+        </span>
       </div>
       <div
         onDrop={handleDragEnd}
@@ -265,9 +273,11 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
       >
         <KanbanAddCard column={column} setCards={setCards} />
 
-        {filteredCards.map((c) => {
-          return <KanbanCard key={c.id} {...c} handleDragStart={handleDragStart} />;
-        })}
+        {filteredCards
+          .filter((c) => c.category === category)
+          .map((c) => {
+            return <KanbanCard key={c.id} {...c} handleDragStart={handleDragStart} />;
+          })}
         <KanbanDropIndicator beforeId={null} column={column} />
       </div>
     </div>
@@ -368,8 +378,9 @@ type KanbanAddCardProps = {
 };
 
 const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
-  const [text, setText] = useState("");
   const [adding, setAdding] = useState(false);
+  const [text, setText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<kanbanCategory>("Kitchen"); // Default category
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -379,6 +390,7 @@ const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
     const newCard = {
       column,
       title: text.trim(),
+      category: selectedCategory, // Use the selected category
       id: Math.random().toString(),
       uid: auth.currentUser?.uid || "",
       displayName: auth.currentUser?.displayName || "",
@@ -412,6 +424,18 @@ const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
             placeholder="Add new item..."
             className="rounded w-full"
           />
+          <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as kanbanCategory)}>
+            <SelectTrigger className="mt-2 w-full">
+              <SelectValue placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Kitchen">Kitchen</SelectItem>
+              <SelectItem value="Bar">Bar</SelectItem>
+              <SelectItem value="DonutStation">Donut Station</SelectItem>
+              <SelectItem value="Counter">Counter</SelectItem>
+              <SelectItem value="Bakery">Bakery</SelectItem>
+            </SelectContent>
+          </Select>
           <div className="flex justify-end gap-1.5 p-2">
             <Button variant="outline" onClick={() => setAdding(false)}>
               <XIcon />

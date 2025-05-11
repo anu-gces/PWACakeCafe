@@ -70,7 +70,7 @@ export function LandingPage() {
 
   return (
     <>
-      <div className="flex lg:flex-row flex-col p-4 w-screen h-screen">
+      <div className="flex lg:flex-row flex-col p-4 w-screen h-screen overflow-clip">
         <div className="top-0 right-0 z-10 absolute p-12">
           <ModeToggle />
         </div>

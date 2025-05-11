@@ -233,7 +233,7 @@ export async function getKanbanCardDocument() {
   }
 }
 
-export async function enterKanbanCardDocument(items: CardType[]) {
+export async function enterKanbanCardDocument(items: KanbanCardType[]) {
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -246,10 +246,10 @@ export async function enterKanbanCardDocument(items: CardType[]) {
   }
 }
 
-export function listenToKanbanCardDocument(callback: (items: CardType[]) => void) {
+export function listenToKanbanCardDocument(callback: (items: KanbanCardType[]) => void) {
   const unsub = onSnapshot(doc(db, "kanban", "allItems"), (docSnap) => {
     if (docSnap.exists()) {
-      const items: CardType[] = docSnap.data().items || [];
+      const items: KanbanCardType[] = docSnap.data().items || [];
 
       callback(items); // Pass the entire items array back
     } else {
@@ -410,7 +410,7 @@ export async function deleteFoodItem(foodIdToDelete: string) {
 }
 
 import { format } from "date-fns";
-import { CardType } from "@/components/ui/kanbanBoard";
+import { CardType as KanbanCardType } from "@/components/ui/kanbanBoard";
 
 export async function createOrderDocument(orderDetails: AddToCart) {
   const auth = getAuth();

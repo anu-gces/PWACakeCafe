@@ -60,7 +60,7 @@ export function Notifications() {
           <div className="flex items-start gap-3">
             <div
               className={`flex-shrink-0 w-1 self-stretch rounded-full ${
-                column === "outOfStock" ? "bg-destructive" : "bg-yellow-400"
+                column === "outOfStock" ? "bg-rose-500" : "bg-yellow-300"
               }`}
             />
 

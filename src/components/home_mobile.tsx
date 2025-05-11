@@ -18,9 +18,7 @@ import {
   DollarSignIcon,
   HelpCircleIcon,
   HistoryIcon,
-  MenuIcon,
   PackageOpenIcon,
-  SettingsIcon,
   UserIcon,
   UsersIcon,
   UtensilsIcon,
@@ -43,7 +41,7 @@ const tabs: TabItem[] = [
     to: '/home/editMenu?category="appetizers"',
   },
   { title: "Notifications", icon: BellIcon, to: "/home/notifications" },
-  { title: "Stocks", icon: PackageOpenIcon, to: "/home/stock" },
+  { title: "Stocks", icon: PackageOpenIcon, to: '/home/stock?category="Kitchen"' },
   { type: "separator" },
   {
     title: "History",
@@ -140,7 +138,7 @@ export function Home() {
                 <div className="flex flex-col flex-grow justify-center items-start space-y-2">
                   <Link
                     to="/home/account"
-                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
+                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm"
                   >
                     <UserIcon className="w-5 h-5" />
                     <span>Profile Settings</span>
@@ -148,32 +146,16 @@ export function Home() {
                   {(user?.role === "admin" || user?.role === "owner") && (
                     <Link
                       to="/home/employee"
-                      className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
+                      className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm"
                     >
                       <UsersIcon className="w-5 h-5" />
                       <span>Employee Management</span>
                     </Link>
                   )}
-                  <Link
-                    to="/home/dashboard"
-                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
-                  >
-                    <BellIcon className="w-5 h-5" />
-
-                    <span>Notifications</span>
-                  </Link>
-
-                  <Link
-                    to="/home/settings"
-                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
-                  >
-                    <SettingsIcon className="w-5 h-5" />
-                    <span>Account Settings</span>
-                  </Link>
 
                   <Link
                     to="/home/help"
-                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300"
+                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm"
                   >
                     <HelpCircleIcon className="w-5 h-5" />
                     <span>Help</span>
@@ -182,6 +164,10 @@ export function Home() {
                 <Separator />
 
                 <DrawerFooter>
+                  <div className="flex items-center space-x-3 rounded-md text-muted-foreground hover:text-foreground text-sm cursor-pointer">
+                    <ModeToggle />
+                    <span>Toggle Light/Dark Mode</span>
+                  </div>
                   <DrawerClose asChild>
                     <Button onClick={() => logoutMutation.mutate()}>Logout</Button>
                   </DrawerClose>
@@ -191,7 +177,7 @@ export function Home() {
           )}
         </div>
 
-        <Drawer direction="right">
+        {/* <Drawer direction="right">
           <DrawerTrigger>
             <MenuIcon />
           </DrawerTrigger>
@@ -201,12 +187,7 @@ export function Home() {
               <DrawerDescription className="text-xs text-nowrap">Visit Frequently Used Pages</DrawerDescription>
             </DrawerHeader>
             <Separator />
-            <div className="flex flex-col flex-grow justify-center items-start space-y-2">
-              <div className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm transition-all duration-300">
-                <ModeToggle />
-                <span>Toggle Light/Dark Mode</span>
-              </div>
-            </div>
+            <div className="flex flex-col flex-grow justify-center items-start space-y-2"></div>
             <Separator />
             <DrawerFooter>
               <DrawerClose asChild>
@@ -214,7 +195,7 @@ export function Home() {
               </DrawerClose>
             </DrawerFooter>
           </DrawerContent>
-        </Drawer>
+        </Drawer> */}
       </div>
       <div className="relative flex-grow pt-2 overflow-x-hidden overflow-y-auto">
         <Outlet />

@@ -5,7 +5,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
   component: LandingPage,
 
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({}) => {
     const user = await getCurrentUserDetails();
 
     // If no user is authenticated, do nothing and let them stay
@@ -20,19 +20,12 @@ export const Route = createFileRoute("/")({
       // If authenticated and profile is complete, navigate to /home
       throw redirect({
         to: "/home/editMenu",
-        search: (prev) => ({
-          ...prev,
-          category: "appetizers",
-          redirect: location.href,
-        }),
+        search: { category: "appetizers" },
       });
     } else {
       // If authenticated but profile is not complete, navigate to /profileComplete
       throw redirect({
         to: "/profileComplete",
-        search: {
-          redirect: location.href,
-        },
       });
     }
   },
