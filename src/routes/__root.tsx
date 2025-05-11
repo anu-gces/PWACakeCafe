@@ -1,5 +1,5 @@
 import { AuthProvider } from "@/components/contexts/authProvider";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "@/components/contexts/themeProvider";
 import { globalError404 } from "@/components/globalError404";
 import { Toaster } from "@/components/ui/sonner";
@@ -27,7 +27,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             }}
           />
           <TanStackRouterDevtools position="top-right" />
-          <ReactQueryDevtools buttonPosition="top-right" position="bottom" initialIsOpen={false} />
+          {/* <ReactQueryDevtools buttonPosition="top-right" position="bottom" initialIsOpen={false} /> */}
         </AuthProvider>
       </div>
     </ThemeProvider>
