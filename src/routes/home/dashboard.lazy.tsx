@@ -6,6 +6,5 @@ import SplashScreen from "@/components/splashscreen";
 export const Route = createLazyFileRoute("/home/dashboard")({
   component: Dashboard,
   pendingComponent: SplashScreen,
-  errorComponent: Error404,
   notFoundComponent: Error404,
 });

@@ -1,13 +1,11 @@
-import { Button } from "@/components/ui/button";
 import { CalendarDateRangePicker } from "@/components/ui/daterangepicker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "@tanstack/react-router";
-import { Download, Share } from "lucide-react";
 import { type Tab, Route as dashboardRoute } from "../../routes/home/dashboard";
 import { Notifications } from "../notifications";
 import { Analytics } from "./analytics";
 import { Overview } from "./overview";
-import { Reports } from "./reports";
+import { BarChartIcon, BellIcon, LayoutDashboardIcon } from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -33,21 +31,26 @@ export default function Dashboard() {
           >
             <div className="flex sm:flex-row flex-col sm:justify-between sm:items-center gap-2">
               <TabsList className="flex-wrap">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="reports">Reports</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                <TabsTrigger value="overview">
+                  <LayoutDashboardIcon className="mr-2 w-4 h-4" /> Overview
+                </TabsTrigger>
+                <TabsTrigger value="analytics">
+                  <BarChartIcon className="mr-2 w-4 h-4" /> Analytics
+                </TabsTrigger>
+                <TabsTrigger value="notifications">
+                  <BellIcon className="mr-2 w-4 h-4" /> Notifications
+                </TabsTrigger>
               </TabsList>
               <div className="flex flex-nowrap items-center gap-2 min-w-0">
                 <div className="flex-shrink">
                   <CalendarDateRangePicker />
                 </div>
-                <Button className="flex-shrink gap-2">
+                {/* <Button className="flex-shrink gap-2">
                   <Download color="#ffffff" size={16} /> Download
                 </Button>
                 <Button className="flex-shrink gap-2" size="icon">
                   <Share color="#ffffff" size={16} />
-                </Button>
+                </Button> */}
               </div>
             </div>
             <TabsContent value="overview" className="space-y-4 h-full">
@@ -58,11 +61,6 @@ export default function Dashboard() {
             <TabsContent value="analytics" className="space-y-4 h-full">
               <div className="flex flex-col gap-4 h-full">
                 <Analytics />
-              </div>
-            </TabsContent>
-            <TabsContent value="reports" className="space-y-4 h-full">
-              <div className="flex flex-col h-full">
-                <Reports />
               </div>
             </TabsContent>
             <TabsContent value="notifications" className="space-y-4 h-full">

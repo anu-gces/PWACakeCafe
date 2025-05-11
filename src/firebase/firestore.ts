@@ -24,6 +24,8 @@ import { app } from "./firebase";
 import { deleteMenuItemImage } from "./firebase_storage";
 import { AddToCart } from "@/components/restaurant_mobile/editMenu";
 import { generateReceiptId } from "./firestore.utils";
+import { format } from "date-fns";
+import { CardType as KanbanCardType } from "@/components/ui/kanbanBoard";
 
 //export const db = getFirestore(app);
 
@@ -409,9 +411,6 @@ export async function deleteFoodItem(foodIdToDelete: string) {
   }
 }
 
-import { format } from "date-fns";
-import { CardType as KanbanCardType } from "@/components/ui/kanbanBoard";
-
 export async function createOrderDocument(orderDetails: AddToCart) {
   const auth = getAuth();
   const user = auth.currentUser;
@@ -471,46 +470,66 @@ export async function getAllOrders(): Promise<
   }
 }
 
-export async function getLastNOrders(n: number) {
-  const orderHistoryRef = collection(db, "OrderHistory");
+export async function getLastNOrders(n: number): Promise<
+  (AddToCart & {
+    processedBy: string;
+    receiptDate: string;
+    receiptId: string;
+  })[]
+> {
+  const orderHistoryRef = collection(db, "orderHistory");
   const q = query(orderHistoryRef, orderBy("receiptDate", "desc"), limit(n));
 
   try {
     const querySnapshot = await getDocs(q);
-    const lastNOrders: DocumentData[] = [];
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data());
-      lastNOrders.push(doc.data());
-    });
+    const lastNOrders = querySnapshot.docs.map(
+      (doc) =>
+        doc.data() as AddToCart & {
+          processedBy: string;
+          receiptDate: string;
+          receiptId: string;
+        }
+    );
+
+    console.log("Last N Orders:", lastNOrders);
     return lastNOrders;
   } catch (error) {
-    console.error("Error fetching last N orders: ", error);
-    throw new Error("Error fetching last N orders");
+    console.error("Error fetching last N orders:", error);
+    throw error;
   }
 }
 
-export async function getOrdersInRange(from: string, to: string): Promise<any[]> {
+export async function getOrdersInRange(
+  from: string,
+  to: string
+): Promise<
+  (AddToCart & {
+    processedBy: string;
+    receiptDate: string;
+    receiptId: string;
+  })[]
+> {
   const ordersCollection = collection(db, "orderHistory");
-  // Convert start date to ISO string directly
   const startDate = new Date(from).toISOString();
-  // Add one day to the end date before converting to ISO string to include the entire day
   const endDate = new Date(new Date(to).setDate(new Date(to).getDate() + 1)).toISOString();
 
-  const q = query(
-    ordersCollection,
-    where("receiptDate", ">=", startDate),
-    where("receiptDate", "<", endDate) // Use "<" instead of "<=" to exclude the start of the next day
-  );
+  const q = query(ordersCollection, where("receiptDate", ">=", startDate), where("receiptDate", "<", endDate));
 
   try {
     const querySnapshot = await getDocs(q);
-    const orders: any[] = [];
-    querySnapshot.forEach((doc) => {
-      orders.push({ id: doc.id, ...doc.data() });
-    });
+    const orders = querySnapshot.docs.map(
+      (doc) =>
+        doc.data() as AddToCart & {
+          processedBy: string;
+          receiptDate: string;
+          receiptId: string;
+        }
+    );
+
+    console.log("Orders in range:", orders);
     return orders;
   } catch (error) {
-    console.error("Error getting documents: ", error);
-    throw new Error(`Failed to get orders in range: ${error}`);
+    console.error("Error fetching orders in range:", error);
+    throw error;
   }
 }

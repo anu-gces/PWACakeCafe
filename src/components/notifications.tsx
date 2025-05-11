@@ -50,7 +50,7 @@ export function Notifications() {
 
   return (
     <div className="space-y-3 p-3">
-      {alerts.map(({ id, title, displayName, updatedAt, column }) => (
+      {alerts.map(({ id, title, displayName, updatedAt, column, category }) => (
         <div
           key={id}
           className="group relative bg-gradient-to-br from-card to-card/80 shadow-md hover:shadow-lg p-4 border rounded-xl overflow-hidden transition-all duration-300"
@@ -66,7 +66,13 @@ export function Notifications() {
 
             <div className="flex-1">
               <div className="flex justify-between items-start mb-1">
-                <h3 className="font-semibold group-hover:text-primary text-base transition-colors">{title}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold group-hover:text-primary text-base transition-colors">{title}</h3>
+                  {/* Category Chip */}
+                  <span className="inline-flex items-center bg-blue-100 px-2 py-0.5 rounded-full font-medium text-blue-600 text-xs">
+                    {category}
+                  </span>
+                </div>
                 <span className="flex items-center gap-1 bg-muted/50 ml-2 px-2 py-0.5 rounded-full text-muted-foreground text-xs">
                   <Clock className="w-3 h-3" />
                   {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}

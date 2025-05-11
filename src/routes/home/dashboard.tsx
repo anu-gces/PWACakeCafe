@@ -44,9 +44,18 @@ export const Route = createFileRoute("/home/dashboard")({
 
 export const dashboardQueryOptions = ({ from, to }: { from: string; to: string }) =>
   queryOptions({
-    queryKey: ["orderHistory"],
+    queryKey: ["orderHistory", from, to],
     queryFn: () => getOrdersInRange(from, to),
-    placeholderData: [],
+    placeholderData: [
+      {
+        receiptId: "",
+        receiptDate: "",
+        processedBy: "",
+        discountRate: 0,
+        taxRate: 0,
+        items: [],
+      },
+    ],
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: Number.POSITIVE_INFINITY,
   });

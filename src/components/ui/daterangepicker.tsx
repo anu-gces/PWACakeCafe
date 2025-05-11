@@ -1,4 +1,4 @@
-import { format, subDays } from "date-fns";
+import { format, parseISO, subDays } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
 import type { DateRange } from "react-day-picker";
@@ -7,17 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { useEffect } from "react";
 
 export function CalendarDateRangePicker({ className }: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: subDays(new Date(), 7), // Set `from` to 7 days prior
-    to: new Date(), // Set `to` to today
-  });
-
+  const search = useSearch({ from: "/home/dashboard" });
   const navigate = useNavigate();
+
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: search.from ? parseISO(search.from) : subDays(new Date(), 7), // Use `from` from search or default to 7 days prior
+    to: search.to ? parseISO(search.to) : new Date(), // Use `to` from search or default to today
+  });
 
   useEffect(() => {
     if (date) {
@@ -69,7 +70,7 @@ export function CalendarDateRangePicker({ className }: React.HTMLAttributes<HTML
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-0 w-auto" align="end">
+        <PopoverContent className="p-0 w-auto translate-x-2 md:translate-x-0" align="end">
           <Calendar
             initialFocus
             mode="range"

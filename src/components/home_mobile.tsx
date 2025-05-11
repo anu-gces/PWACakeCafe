@@ -13,6 +13,7 @@ import { getCurrentUserDocumentDetails } from "@/firebase/firestore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import {
+  BarChart2Icon,
   BellIcon,
   CalendarIcon,
   DollarSignIcon,
@@ -152,6 +153,15 @@ export function Home() {
                       <span>Employee Management</span>
                     </Link>
                   )}
+
+                  <Link
+                    to="/home/dashboard"
+                    search={{ tab: "analytics" }}
+                    className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm"
+                  >
+                    <BarChart2Icon className="w-5 h-5" />
+                    <span>Analytics</span>
+                  </Link>
 
                   <Link
                     to="/home/help"

@@ -70,7 +70,7 @@ export function LandingPage() {
 
   return (
     <>
-      <div className="flex lg:flex-row flex-col p-4 w-screen h-screen overflow-clip">
+      <div className="flex lg:flex-row flex-col p-4 md:p-16 w-screen h-screen overflow-clip">
         <div className="top-0 right-0 z-10 absolute p-12">
           <ModeToggle />
         </div>
@@ -99,6 +99,9 @@ export function LandingPage() {
             <LoginForm />
           </motion.div>
         </AnimatePresence>
+        <footer className="bottom-2 left-1/2 absolute text-gray-500 text-xs -translate-x-1/2 transform">
+          &copy; {new Date().getFullYear()} anuvette. All rights reserved.
+        </footer>
       </div>
     </>
   );

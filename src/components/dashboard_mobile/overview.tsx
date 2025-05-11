@@ -1,62 +1,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "@tanstack/react-router";
+import { useLoaderData, useNavigate } from "@tanstack/react-router";
 import { DollarSign } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import AnimatedCounter from "../ui/animatedCounter";
 import { RecentSales } from "./recentsales";
+import { format, parseISO } from "date-fns";
 
-const data = [
-  {
-    name: "Jan",
-    total: 0,
-  },
-  {
-    name: "Feb",
-    total: 0,
-  },
-  {
-    name: "Mar",
-    total: 0,
-  },
-  {
-    name: "Apr",
-    total: 0,
-  },
-  {
-    name: "May",
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: "Jun",
-    total: 0,
-  },
-  {
-    name: "Jul",
-    total: 0,
-  },
-  {
-    name: "Aug",
-    total: 0,
-  },
-  {
-    name: "Sep",
-    total: 0,
-  },
-  {
-    name: "Oct",
-    total: 0,
-  },
-  {
-    name: "Nov",
-    total: 0,
-  },
-  {
-    name: "Dec",
-    total: 0,
-  },
-];
-
-export function OverviewBarChart() {
+export function OverviewBarChart({ data }: { data: { name: string; total: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={400}>
       <BarChart data={data}>
@@ -83,6 +33,60 @@ export function OverviewBarChart() {
 
 export function Overview() {
   const navigate = useNavigate();
+  const rawOrders = useLoaderData({ from: "/home/dashboard" }) || []; // Default to empty array if no orders
+
+  const totalRevenue = rawOrders.reduce((sum, order) => {
+    const subTotal = order.items.reduce((itemSum, item) => itemSum + item.foodPrice * item.qty, 0);
+    const discount = subTotal * (order.discountRate / 100);
+    const tax = (subTotal - discount) * (order.taxRate / 100);
+    const total = subTotal - discount + tax;
+    return sum + total;
+  }, 0);
+
+  const ordersByDay = rawOrders.reduce((acc: Record<string, number>, order) => {
+    const day = format(parseISO(order.receiptDate), "EEEE"); // Get the day of the week
+    acc[day] = (acc[day] || 0) + 1; // Increment the count for the day
+    return acc;
+  }, {});
+
+  // Handle the case when there are no orders or no data for the busiest day
+  const sortedDays = Object.entries(ordersByDay).sort((a, b) => b[1] - a[1]);
+  const [busiestDay, busiestDaySales] = sortedDays.length > 0 ? sortedDays[0] : ["No data", 0];
+
+  const totalSales = rawOrders.reduce((sum, order) => {
+    const salesCount = order.items.reduce((itemSum, item) => itemSum + item.qty, 0);
+    return sum + salesCount;
+  }, 0);
+
+  const topSellingItems = rawOrders
+    .flatMap((order) => order.items)
+    .reduce((acc: Record<string, number>, item) => {
+      acc[item.foodName] = (acc[item.foodName] || 0) + item.qty;
+      return acc;
+    }, {});
+
+  const sortedTopSellingItems = Object.entries(topSellingItems)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([foodName]) => foodName)
+    .join(", ");
+
+  const monthlyRevenue = Array.from({ length: 12 }, (_, index) => {
+    const monthOrders = rawOrders.filter((order) => {
+      const month = parseISO(order.receiptDate).getMonth(); // 0-indexed (Jan = 0)
+      return month === index;
+    });
+
+    const total = monthOrders.reduce((sum, order) => {
+      const subTotal = order.items.reduce((itemSum, item) => itemSum + item.foodPrice * item.qty, 0);
+      const discount = subTotal * (order.discountRate / 100);
+      const tax = (subTotal - discount) * (order.taxRate / 100);
+      return sum + subTotal - discount + tax;
+    }, 0);
+
+    return { name: format(new Date(2023, index), "MMM"), total: Math.round(total) };
+  });
+
   return (
     <>
       {/* Summary Cards - 2x2 on mobile */}
@@ -95,23 +99,33 @@ export function Overview() {
           <CardContent>
             <div className="font-bold text-2xl">
               Rs.
-              <AnimatedCounter from={0} to={45231.89} />
+              <AnimatedCounter from={0} to={totalRevenue} />
             </div>
-            <p className="text-muted-foreground text-xs">+20.1% from last month</p>
+            <p className="text-muted-foreground text-xs">This month's total revenue</p>
           </CardContent>
         </Card>
 
         <Card className="w-full">
           <CardHeader className="flex flex-row justify-between items-center space-y-0 pb-2">
-            <CardTitle className="font-medium text-sm">Expenditure</CardTitle>
-            <DollarSign color="red" size={16} />
+            <CardTitle className="font-medium text-sm">Busiest Day</CardTitle>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              className="w-4 h-4 text-muted-foreground"
+            >
+              <path d="M3 12h18" />
+              <path d="M3 6h18" />
+              <path d="M3 18h18" />
+            </svg>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">
-              Rs.
-              <AnimatedCounter from={0} to={2350} />
-            </div>
-            <p className="text-muted-foreground text-xs">+180.1% from last month</p>
+            <div className="font-bold text-2xl">{busiestDay}</div>
+            <p className="text-muted-foreground text-sm">{busiestDaySales} orders were placed on this day.</p>
           </CardContent>
         </Card>
 
@@ -134,9 +148,9 @@ export function Overview() {
           </CardHeader>
           <CardContent>
             <div className="font-bold text-2xl">
-              <AnimatedCounter from={0} to={12234} />
+              <AnimatedCounter from={0} to={totalSales} />
             </div>
-            <p className="text-muted-foreground text-xs">+19% from last month</p>
+            <p className="text-muted-foreground text-xs">{totalSales} items sold this week</p>
           </CardContent>
         </Card>
 
@@ -157,8 +171,8 @@ export function Overview() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="font-bold text-2xl">Pizza, Pasta</div>
-            <p className="text-muted-foreground text-xs">Based on last month</p>
+            <div className="font-bold text-2xl">{sortedTopSellingItems}</div>
+            <p className="text-muted-foreground text-xs">Based on Selected Range</p>
           </CardContent>
         </Card>
       </div>
@@ -171,7 +185,7 @@ export function Overview() {
             <CardDescription>Bar chart of monthly revenue.</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <OverviewBarChart />
+            <OverviewBarChart data={monthlyRevenue} />
           </CardContent>
         </Card>
         <Card
@@ -185,7 +199,7 @@ export function Overview() {
         >
           <CardHeader>
             <CardTitle>Recent Sales</CardTitle>
-            <CardDescription>You made 265 sales this month.</CardDescription>
+            <CardDescription>Last 10 Sales. Click for more.</CardDescription>
           </CardHeader>
           <CardContent>
             <RecentSales />

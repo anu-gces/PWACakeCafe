@@ -1,8 +1,6 @@
 import { DataTable } from "@/components/ui/dataTable_billing";
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute, useLoaderData } from "@tanstack/react-router";
 import { columns } from "@/components/restaurant_mobile/billing";
-import { getAllOrders } from "@/firebase/firestore";
-import { useSuspenseQuery } from "@tanstack/react-query";
 
 // const orders = [
 //   {
@@ -33,10 +31,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 export const Route = createLazyFileRoute("/home/billing")({
   component: () => {
-    const { data: rawOrders } = useSuspenseQuery({
-      queryKey: ["getAllOrders"], // Use the same query key
-      queryFn: getAllOrders, // Use the same query function
-    });
+    const rawOrders = useLoaderData({ from: "/home/billing" });
 
     const orders = rawOrders.map((order) => {
       const subTotalAmount = order.items.reduce((sum, item) => sum + item.foodPrice * item.qty, 0);
