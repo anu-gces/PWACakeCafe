@@ -34,7 +34,6 @@ import { ExpandableTabs, type TabItem } from "./ui/expandable-tabs";
 import { Separator } from "./ui/separator";
 import { ModeToggle } from "./ui/themeToggle";
 import fallbackAvatar from "@/assets/fallbackAvatar.png";
-import { registerSW } from "virtual:pwa-register";
 import ReloadPrompt from "./reloadPrompt";
 
 const tabs: TabItem[] = [
