@@ -65,6 +65,7 @@ export function Home() {
     const updateSW = registerSW({
       onNeedRefresh() {
         toast("New update available", {
+          duration: Infinity,
           action: {
             label: "Update",
             onClick: () => updateSW(true),
@@ -72,7 +73,9 @@ export function Home() {
         });
       },
       onOfflineReady() {
-        toast.success("App is ready for offline use");
+        toast.success("App is ready for offline use", {
+          duration: Infinity,
+        });
       },
     });
   }, []);
