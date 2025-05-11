@@ -120,13 +120,22 @@ export function Home() {
           ) : (
             <Drawer direction="left">
               <DrawerTrigger asChild>
-                <Avatar className="w-10 h-10 cursor-pointer">
-                  <AvatarImage src={user?.profilePicture || user?.photoURL || fallbackAvatar} alt="User Avatar" />
-                  <AvatarFallback>
-                    {user?.firstName?.charAt(0).toUpperCase() || "U"}
-                    {user?.lastName?.charAt(0).toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
+                <div
+                  onClick={(e) => e.stopPropagation()} // Prevent drawer from being triggered
+                  className="flex items-center gap-3 bg-muted hover:bg-accent shadow-sm p-3 rounded-lg transition cursor-pointer"
+                >
+                  <Avatar className="w-12 h-12">
+                    <AvatarImage src={user?.profilePicture || user?.photoURL || fallbackAvatar} alt="User Avatar" />
+                    <AvatarFallback>
+                      {user?.firstName?.charAt(0).toUpperCase() || "U"}
+                      {user?.lastName?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col flex-grow">
+                    <span className="text-muted-foreground text-sm">Welcome back,</span>
+                    <span className="font-semibold text-foreground text-lg">{user?.firstName || "User"}!</span>
+                  </div>
+                </div>
               </DrawerTrigger>
               <DrawerContent className="flex flex-col justify-between h-full">
                 <DrawerHeader>
@@ -172,7 +181,6 @@ export function Home() {
                   </Link>
                 </div>
                 <Separator />
-
                 <DrawerFooter>
                   <div className="flex items-center space-x-3 rounded-md text-muted-foreground hover:text-foreground text-sm cursor-pointer">
                     <ModeToggle />
