@@ -35,6 +35,7 @@ import { Separator } from "./ui/separator";
 import { ModeToggle } from "./ui/themeToggle";
 import fallbackAvatar from "@/assets/fallbackAvatar.png";
 import { registerSW } from "virtual:pwa-register";
+import ReloadPrompt from "./reloadPrompt";
 
 const tabs: TabItem[] = [
   {
@@ -60,25 +61,6 @@ const tabs: TabItem[] = [
 
 export function Home() {
   const navigate = useNavigate({ from: "/home" });
-
-  useEffect(() => {
-    const updateSW = registerSW({
-      onNeedRefresh() {
-        toast("New update available", {
-          duration: Infinity,
-          action: {
-            label: "Update",
-            onClick: () => updateSW(true),
-          },
-        });
-      },
-      onOfflineReady() {
-        toast.success("App is ready for offline use", {
-          duration: Infinity,
-        });
-      },
-    });
-  }, []);
 
   const queryClient = useQueryClient();
 
@@ -206,6 +188,8 @@ export function Home() {
             </Drawer>
           )}
         </div>
+
+        <ReloadPrompt />
 
         {/* <Drawer direction="right">
           <DrawerTrigger>
