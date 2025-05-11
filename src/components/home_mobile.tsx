@@ -34,6 +34,7 @@ import { ExpandableTabs, type TabItem } from "./ui/expandable-tabs";
 import { Separator } from "./ui/separator";
 import { ModeToggle } from "./ui/themeToggle";
 import fallbackAvatar from "@/assets/fallbackAvatar.png";
+import { registerSW } from "virtual:pwa-register";
 
 const tabs: TabItem[] = [
   {
@@ -59,6 +60,22 @@ const tabs: TabItem[] = [
 
 export function Home() {
   const navigate = useNavigate({ from: "/home" });
+
+  useEffect(() => {
+    const updateSW = registerSW({
+      onNeedRefresh() {
+        toast("New update available", {
+          action: {
+            label: "Update",
+            onClick: () => updateSW(true),
+          },
+        });
+      },
+      onOfflineReady() {
+        toast.success("App is ready for offline use");
+      },
+    });
+  }, []);
 
   const queryClient = useQueryClient();
 
