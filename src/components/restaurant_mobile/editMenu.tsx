@@ -1,5 +1,5 @@
 import CakeCafeLogo from "@/assets/Logo.png";
-import { NotebookPenIcon, PlusIcon, RotateCwIcon, SearchIcon } from "lucide-react";
+import { LoaderIcon, NotebookPenIcon, PlusIcon, RotateCwIcon, SearchIcon } from "lucide-react";
 
 import { type MenuCategory, Route as editMenuRoute } from "@/routes/home/editMenu";
 import { AnimatePresence, motion } from "motion/react";
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { uploadMenuItemImage } from "@/firebase/firebase_storage";
-import { createOrderDocument, enterFoodItem, getFoodItems } from "@/firebase/firestore";
+import { createOrderDocument, enterFoodItem, getCurrentUserDocumentDetails, getFoodItems } from "@/firebase/firestore";
 import { cn, useLoadingSpinner } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -33,7 +33,6 @@ import { OriginTabs, OriginTabsList, OriginTabsTrigger } from "../ui/originTabs"
 import { ScrollArea } from "../ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { NumberInput } from "../ui/number-input";
-import { auth } from "@/firebase/firebase";
 
 export type FoodItemProps = {
   foodId: string;
@@ -152,21 +151,24 @@ export function editMenu() {
       </div>
       <CategoryTabs />
       {/*  Search Input */}
-      <div className="relative my-4 w-full">
-        <SearchIcon className="top-1/2 left-3 absolute w-5 h-5 text-muted-foreground -translate-y-1/2" />
-        <Input
-          type="text"
-          placeholder="Search food..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-10"
-        />
+      <div className="mt-6">
+        <div className="relative px-4 py-2">
+          <SearchIcon className="top-1/2 left-8 absolute w-5 h-5 text-muted-foreground -translate-y-1/2" />
+          <Input
+            type="text"
+            placeholder="Search food..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10"
+          />
+        </div>
       </div>
       <div className="gap-0 grid grid-cols-1">
         {foods
           .filter(
             (food) => food.foodCategory === category && food.foodName.toLowerCase().includes(search.toLowerCase())
           )
+          .sort((a, b) => a.foodName.localeCompare(b.foodName)) // Sort alphabetically by foodName
           .map((food) => (
             <AnimatePresence key={food.foodId}>
               <motion.div layout>
@@ -283,6 +285,13 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
   const taxAmount = (subtotal - discountAmount) * (taxRate / 100);
   const total = subtotal - discountAmount + taxAmount;
 
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    queryFn: getCurrentUserDocumentDetails,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
+  });
+
   return (
     <div className="mx-auto w-full print:max-w-[300px] max-w-sm font-mono print:text-xs text-sm">
       <div className="bg-white dark:bg-black p-4 border border-border">
@@ -364,9 +373,7 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
             </TableRow>
 
             <TableRow>
-              <TableCell className="text-gray-500 text-xs text-left">
-                Processed By: {auth.currentUser?.displayName ?? auth.currentUser?.email}
-              </TableCell>
+              <TableCell className="text-gray-500 text-xs text-left">Processed By: {user?.firstName}</TableCell>
               <TableCell className="font-semibold text-right">Total</TableCell>
               <TableCell className="font-bold text-right">Rs.{total.toFixed(2)}</TableCell>
             </TableRow>
@@ -537,8 +544,12 @@ function AddDrawer() {
                 </div>
               </div>
               <DrawerFooter>
-                <Button className="text-white" type="submit">
-                  Submit
+                <Button
+                  className="text-white"
+                  type="submit"
+                  disabled={enterFoodItemsMutation.isPending} // Disable button if loading
+                >
+                  {enterFoodItemsMutation.isPending ? <LoaderIcon className="animate-spin" color="white" /> : "Submit"}
                 </Button>
                 <DrawerClose asChild>
                   <Button variant="outline" type="button">

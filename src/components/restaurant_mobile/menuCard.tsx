@@ -10,7 +10,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PencilIcon, Trash2Icon } from "lucide-react";
+import { LoaderIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { motion, useMotionValue, animate, PanInfo } from "motion/react";
 import { Button } from "../ui/button";
 import type { FoodItemProps } from "./editMenu";
@@ -139,6 +139,8 @@ function EditDrawer({ food }: { food: FoodItemProps }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["foods"] });
+      setOpen(false); // Close the drawer
+
       toast("Food Item edited successfully!");
     },
     onError: (error: any) => {
@@ -278,8 +280,12 @@ function EditDrawer({ food }: { food: FoodItemProps }) {
               </div>
 
               <DrawerFooter>
-                <Button className="text-white" type="submit" onClick={() => setOpen(false)}>
-                  Save Changes
+                <Button className="text-white" type="submit">
+                  {editFoodItemsMutation.isPending ? (
+                    <LoaderIcon className="animate-spin" color="white" />
+                  ) : (
+                    "Save Changes"
+                  )}
                 </Button>
                 <DrawerClose asChild>
                   <Button type="button" variant="outline">
@@ -306,6 +312,8 @@ function DeleteDrawer({ food }: { food: FoodItemProps }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["foods"] });
+      setOpen(false); // Close the drawer
+
       toast("Food Item(s) removed successfully!");
     },
     onError: (error: any) => {
@@ -330,10 +338,9 @@ function DeleteDrawer({ food }: { food: FoodItemProps }) {
             type="submit"
             onClick={() => {
               deleteFoodItemsMutation.mutate(); // Trigger the delete mutation
-              setOpen(false); // Close the drawer
             }}
           >
-            Save Changes
+            {deleteFoodItemsMutation.isPending ? <LoaderIcon className="animate-spin" color="white" /> : "Save Changes"}
           </Button>
           <DrawerClose asChild>
             <Button type="button" variant="outline">

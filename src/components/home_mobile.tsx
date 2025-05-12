@@ -120,22 +120,25 @@ export function Home() {
           ) : (
             <Drawer direction="left">
               <DrawerTrigger asChild>
-                <div
-                  onClick={(e) => e.stopPropagation()} // Prevent drawer from being triggered
-                  className="flex items-center gap-3 bg-muted hover:bg-accent shadow-sm p-3 rounded-lg transition cursor-pointer"
+                <button
+                  type="button"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-4 bg-background hover:bg-muted shadow-sm px-2 py-2 border border-border rounded-xl w-full text-left transition"
                 >
-                  <Avatar className="w-12 h-12">
+                  <Avatar className="ring-2 ring-muted w-11 h-11">
                     <AvatarImage src={user?.profilePicture || user?.photoURL || fallbackAvatar} alt="User Avatar" />
-                    <AvatarFallback>
+                    <AvatarFallback className="font-medium text-base">
                       {user?.firstName?.charAt(0).toUpperCase() || "U"}
                       {user?.lastName?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col flex-grow">
-                    <span className="text-muted-foreground text-sm">Welcome back,</span>
-                    <span className="font-semibold text-foreground text-lg">{user?.firstName || "User"}!</span>
+                  <div className="flex flex-col justify-center">
+                    <span className="text-muted-foreground text-xs tracking-wide">Welcome back,</span>
+                    <span className="font-semibold text-foreground text-sm leading-tight">
+                      {user?.firstName || "User"}!
+                    </span>
                   </div>
-                </div>
+                </button>
               </DrawerTrigger>
               <DrawerContent className="flex flex-col justify-between h-full">
                 <DrawerHeader>

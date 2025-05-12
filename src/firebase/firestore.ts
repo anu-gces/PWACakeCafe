@@ -2,6 +2,7 @@ import type { calendarEventProps } from "@/components/calendar";
 import type { FoodItemProps } from "@/components/restaurant_mobile/editMenu";
 // import { FirebaseError } from "firebase/app";
 import { type User, getAuth, onAuthStateChanged } from "firebase/auth";
+import { type User as UserType } from "@/components/employee";
 import {
   type DocumentData,
   collection,
@@ -111,7 +112,7 @@ export async function completeProfileInformation(
   await updateDoc(userRef, updatedUser);
 }
 
-export async function getCurrentUserDocumentDetails(): Promise<DocumentData | null> {
+export async function getCurrentUserDocumentDetails(): Promise<UserType | null> {
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -122,7 +123,7 @@ export async function getCurrentUserDocumentDetails(): Promise<DocumentData | nu
     if (userDoc.exists()) {
       // console.log("line 113", userDoc.data); // Log the user data
 
-      return userDoc.data();
+      return userDoc.data() as UserType;
     } else {
       throw new Error("User document does not exist");
     }

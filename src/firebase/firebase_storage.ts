@@ -38,7 +38,7 @@
 
 export const uploadProfilePicture = async (userId: string, file: File): Promise<string> => {
   const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/dxvbprkmo/image/upload`;
-  const uploadPreset = "CakeCafeMenu"; // Same upload preset
+  const uploadPreset = "CakeCafeMenu";
 
   const formData = new FormData();
   formData.append("file", file);
@@ -65,12 +65,12 @@ export const uploadProfilePicture = async (userId: string, file: File): Promise<
 
 export const uploadMenuItemImage = async (foodId: string, foodPhoto: File) => {
   const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/dxvbprkmo/image/upload`;
-  const uploadPreset = "CakeCafeMenu"; // You need to create an upload preset in Cloudinary
+  const uploadPreset = "CakeCafeMenu";
 
   const formData = new FormData();
   formData.append("file", foodPhoto);
   formData.append("upload_preset", uploadPreset);
-  formData.append("public_id", foodId); // You can set a custom ID for the image
+  formData.append("public_id", foodId);
 
   try {
     const response = await fetch(CLOUDINARY_URL, {
@@ -105,7 +105,7 @@ export const uploadMenuItemImage = async (foodId: string, foodPhoto: File) => {
 // };
 
 export const deleteMenuItemImage = async (foodId: string) => {
-  const response = await fetch(`https://soft-hall-8baa.thisisanuxoxo.workers.dev?foodId=${foodId}`, {
+  const response = await fetch(`https://long-rhino-53.deno.dev/delete?public_id=${foodId}`, {
     method: "DELETE",
   });
 

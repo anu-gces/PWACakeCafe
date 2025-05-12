@@ -40,6 +40,7 @@ export type User = {
   phoneNumber: string;
   department: string;
   role: string;
+  profilePicture?: string | null;
   isProfileComplete: boolean;
 };
 

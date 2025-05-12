@@ -3,9 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "@tanstack/react-router";
 import { type Tab, Route as dashboardRoute } from "../../routes/home/dashboard";
 import { Notifications } from "../notifications";
-import { Analytics } from "./analytics";
 import { Overview } from "./overview";
-import { BarChartIcon, BellIcon, LayoutDashboardIcon } from "lucide-react";
+import { BellIcon, LayoutDashboardIcon } from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -34,9 +33,9 @@ export default function Dashboard() {
                 <TabsTrigger value="overview">
                   <LayoutDashboardIcon className="mr-2 w-4 h-4" /> Overview
                 </TabsTrigger>
-                <TabsTrigger value="analytics">
+                {/* <TabsTrigger value="analytics">
                   <BarChartIcon className="mr-2 w-4 h-4" /> Analytics
-                </TabsTrigger>
+                </TabsTrigger> */}
                 <TabsTrigger value="notifications">
                   <BellIcon className="mr-2 w-4 h-4" /> Notifications
                 </TabsTrigger>
@@ -58,11 +57,7 @@ export default function Dashboard() {
                 <Overview />
               </div>
             </TabsContent>
-            <TabsContent value="analytics" className="space-y-4 h-full">
-              <div className="flex flex-col gap-4 h-full">
-                <Analytics />
-              </div>
-            </TabsContent>
+
             <TabsContent value="notifications" className="space-y-4 h-full">
               <Notifications />
             </TabsContent>
