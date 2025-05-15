@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { enterKanbanCardDocument, getKanbanCardDocument } from "@/firebase/firestore";
+import { enterKanbanCardDocument, getCurrentUserDocumentDetails, getKanbanCardDocument } from "@/firebase/firestore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { GripVertical, Loader, Plus, SaveIcon, Trash2, XIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { type Dispatch, type DragEvent, type FormEvent, type SetStateAction, useEffect, useState } from "react";
+import { type Dispatch, type DragEvent, type FormEvent, type SetStateAction, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 //@ts-ignore
 import { enableDragDropTouch } from "@/lib/drag-drop-touch.esm.min.js";
@@ -13,22 +13,56 @@ import { auth } from "@/firebase/firebase";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 import { kanbanCategory } from "../stock";
 import { useSearch } from "@tanstack/react-router";
+import { Input } from "./input";
+import { Label } from "./label";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 type ColumnType = "inStock" | "runningLow" | "outOfStock" | "restocked";
 
 export type CardType = {
   title: string;
   id: string;
+  price: number;
   category: kanbanCategory;
   column: ColumnType;
   uid: string;
   displayName: string;
   email: string;
+  lastModifiedUid: string;
+  lastModifiedDisplayName: string;
+  lastModifiedEmail: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export function KanbanBoard() {
+const COLUMNS: ColumnType[] = ["inStock", "runningLow", "outOfStock", "restocked"];
+const CATEGORIES: kanbanCategory[] = ["Kitchen", "Bar", "DonutStation", "Counter", "Bakery"];
+
+export function generateDummyCards(count: number): CardType[] {
+  const cards: CardType[] = [];
+  for (let i = 0; i < count; i++) {
+    const column = COLUMNS[Math.floor(Math.random() * COLUMNS.length)];
+    const category = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+    cards.push({
+      title: `Item ${i + 1}`,
+      id: `dummy-${i}`,
+      price: Math.floor(Math.random() * 1000),
+      category,
+      column,
+      uid: `user${i % 5}`,
+      displayName: `User ${i % 5}`,
+      email: `user${i % 5}@test.com`,
+      lastModifiedUid: `user${i % 5}`,
+      lastModifiedDisplayName: `User ${i % 5}`,
+      lastModifiedEmail: `user${i % 5}@test.com`,
+      createdAt: new Date(Date.now() - Math.random() * 1e10).toISOString(),
+      updatedAt: new Date(Date.now() - Math.random() * 1e9).toISOString(),
+    });
+  }
+  return cards;
+}
+
+export function KanbanBoard({ search }: { search: string }) {
   const {
     data: kanbanCards,
     isLoading,
@@ -46,7 +80,6 @@ export function KanbanBoard() {
 
   useEffect(() => {
     if (kanbanCards) {
-      console.log("kanbanCards", kanbanCards);
       // Set the initial state of cards
       setCards(kanbanCards);
     }
@@ -64,6 +97,7 @@ export function KanbanBoard() {
     // Save cards to firestore
     enterKanbanCardMutation.mutate(cards);
   };
+
   useEffect(() => {
     enableDragDropTouch(); // Apply polyfill for touch support
   }, []);
@@ -93,6 +127,7 @@ export function KanbanBoard() {
           title="In Stock"
           column="inStock"
           headingColor="text-blue-500"
+          searchFilter={search}
           cards={cards}
           setCards={setCards}
         />
@@ -100,6 +135,7 @@ export function KanbanBoard() {
           title="Running Low"
           column="runningLow"
           headingColor="text-yellow-500"
+          searchFilter={search}
           cards={cards}
           setCards={setCards}
         />
@@ -107,6 +143,7 @@ export function KanbanBoard() {
           title="Out of Stock"
           column="outOfStock"
           headingColor="text-red-600"
+          searchFilter={search}
           cards={cards}
           setCards={setCards}
         />
@@ -114,6 +151,7 @@ export function KanbanBoard() {
           title="Restocked"
           column="restocked"
           headingColor="text-emerald-400"
+          searchFilter={search}
           cards={cards}
           setCards={setCards}
         />
@@ -140,9 +178,10 @@ type KanbanColumnProps = {
   cards: CardType[];
   column: ColumnType;
   setCards: Dispatch<SetStateAction<CardType[]>>;
+  searchFilter?: string;
 };
 
-const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanColumnProps) => {
+const KanbanColumn = ({ title, headingColor, cards, column, setCards, searchFilter }: KanbanColumnProps) => {
   const [active, setActive] = useState(false);
   const search = useSearch({ from: "/home/stock" });
   const category = search.category;
@@ -172,9 +211,9 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
       cardToTransfer = {
         ...cardToTransfer,
         column,
-        uid: auth.currentUser?.uid || "",
-        displayName: auth.currentUser?.displayName || "",
-        email: auth.currentUser?.email || "",
+        lastModifiedUid: auth.currentUser?.uid || "",
+        lastModifiedDisplayName: auth.currentUser?.displayName || "",
+        lastModifiedEmail: auth.currentUser?.email || "",
         updatedAt: new Date().toISOString(),
       };
 
@@ -255,10 +294,26 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
     setActive(false);
   };
 
-  const filteredCards = cards.filter((c) => c.column === column);
+  const handleCardUpdate = (updatedCard: CardType) => {
+    setCards((prevCards) => prevCards.map((c) => (c.id === updatedCard.id ? { ...c, ...updatedCard } : c)));
+  };
+
+  const scrollRef = useRef(null);
+
+  const columnCards = cards.filter((c) => c.column === column);
+  const filteredCards = columnCards.filter((card) =>
+    searchFilter ? card.title.toLowerCase().includes(searchFilter.toLowerCase()) : card.category === category
+  );
+
+  const rowVirtualizer = useVirtualizer({
+    count: filteredCards.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 120, // <-- adjust to average card height
+    overscan: 5,
+  });
 
   return (
-    <div className="flex flex-col flex-[50%] landscape:w-full max-w-[50%] h-[50%] landscape:h-full overflow-x-hidden overflow-y-scroll">
+    <div className="flex flex-col flex-[50%] landscape:w-full max-w-[50%] h-[50%] landscape:h-full overflow-x-hidden">
       <div className="flex justify-between items-center mb-3 p-2 px-3 border-b-2">
         <h3 className={`font-medium ${headingColor}`}>{title}</h3>
         <span className="rounded text-neutral-400 text-sm">
@@ -266,42 +321,176 @@ const KanbanColumn = ({ title, headingColor, cards, column, setCards }: KanbanCo
         </span>
       </div>
       <div
+        ref={scrollRef}
         onDrop={handleDragEnd}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`h-full w-full p-2  pr-12 transition-colors rounded ${active ? "bg-input/100" : "bg-black/0"}`}
+        className={`h-full w-full p-2 overflow-y-scroll  pr-12 transition-colors rounded ${active ? "bg-input/100" : "bg-black/0"}`}
       >
         <KanbanAddCard column={column} setCards={setCards} />
 
-        {filteredCards
-          .filter((c) => c.category === category)
-          .map((c) => {
-            return <KanbanCard key={c.id} {...c} handleDragStart={handleDragStart} />;
+        {/* {filteredCards
+          .filter((card) =>
+            searchFilter ? card.title.toLowerCase().includes(searchFilter.toLowerCase()) : card.category === category
+          )
+          .map((card) => {
+            return (
+              <KanbanCard
+                key={card.id}
+                card={card}
+                handleCardUpdate={handleCardUpdate}
+                {...card}
+                handleDragStart={handleDragStart}
+              />
+            );
+          })} */}
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            position: "relative",
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const card = filteredCards[virtualRow.index];
+            return (
+              <div
+                key={card.id}
+                ref={rowVirtualizer.measureElement}
+                data-index={virtualRow.index}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <KanbanCard
+                  card={card}
+                  handleCardUpdate={handleCardUpdate}
+                  {...card}
+                  handleDragStart={handleDragStart}
+                />
+              </div>
+            );
           })}
+        </div>
         <KanbanDropIndicator beforeId={null} column={column} />
       </div>
     </div>
   );
 };
 
-type CardProps = CardType & {
+type CardProps = {
+  card: CardType;
+  handleCardUpdate: (updatedCard: CardType) => void;
   handleDragStart: Function;
 };
 
-const KanbanCard = ({ title, id, column, handleDragStart }: CardProps) => {
+const KanbanCard = ({ card, handleCardUpdate, handleDragStart }: CardProps) => {
   const [open, setOpen] = useState(false);
+  const [itemTitle, setItemTitle] = useState(card.title);
+  const [price, setPrice] = useState((card.price ?? 0).toString());
+  const [selectedCategory, setSelectedCategory] = useState<kanbanCategory>("Kitchen");
+  const getUser = useQuery({
+    queryKey: ["user"],
+    queryFn: getCurrentUserDocumentDetails,
+  });
+
   return (
     <>
-      <KanbanDropIndicator beforeId={id} column={column} />
+      <KanbanDropIndicator beforeId={card.id} column={card.column} />
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle className="self-center">Truncated Text</DrawerTitle>
-            <p className="self-center">{title}</p>
+          <DrawerHeader className="space-y-4">
+            <DrawerTitle className="self-center">Item Details</DrawerTitle>
           </DrawerHeader>
-          <DrawerFooter>
+
+          <div className="flex flex-col gap-4 px-4 py-2">
+            <div>
+              <Label htmlFor="itemTitle" className="block mb-1">
+                Item Name
+              </Label>
+              <Input
+                id="itemTitle"
+                value={itemTitle}
+                onChange={(e) => setItemTitle(e.target.value)}
+                placeholder="Enter item name"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="price" className="block mb-1">
+                price
+              </Label>
+              <Input
+                id="price"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="Edit price"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="category" className="block mb-1">
+                Category
+              </Label>
+              <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as kanbanCategory)}>
+                <SelectTrigger className="mt-0 w-full" id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Kitchen">Kitchen</SelectItem>
+                  <SelectItem value="Bar">Bar</SelectItem>
+                  <SelectItem value="DonutStation">Donut Station</SelectItem>
+                  <SelectItem value="Counter">Counter</SelectItem>
+                  <SelectItem value="Bakery">Bakery</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* add immutable fields that are created information last modified information creation date last modified data */}
+
+          <div className="gap-2 grid grid-cols-2 bg-muted/50 mt-2 p-2 rounded text-muted-foreground text-xs">
+            <div>
+              <div className="font-semibold">Created By</div>
+              <div>{card.displayName || card.email}</div>
+              <div>{new Date(card.createdAt).toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="font-semibold">Last Modified By</div>
+              <div>{card.lastModifiedDisplayName || card.lastModifiedEmail || "unknown"}</div>
+              <div>{new Date(card.updatedAt).toLocaleString()}</div>
+            </div>
+          </div>
+
+          <DrawerFooter className="flex flex-col gap-2">
+            <Button
+              className="w-full"
+              onClick={() => {
+                handleCardUpdate({
+                  ...card,
+                  title: itemTitle,
+                  price: Number(price),
+                  category: selectedCategory,
+                  lastModifiedUid: getUser.data?.uid || "",
+                  lastModifiedDisplayName: getUser.data?.firstName || "",
+                  lastModifiedEmail: getUser.data?.email || "",
+                  updatedAt: new Date().toISOString(),
+                });
+
+                setOpen(false);
+              }}
+            >
+              Save
+            </Button>
             <DrawerClose>
-              <Button className="w-full">Close</Button>
+              <Button variant="outline" className="w-full">
+                Cancel
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
@@ -309,19 +498,18 @@ const KanbanCard = ({ title, id, column, handleDragStart }: CardProps) => {
 
       <motion.div
         layout
-        layoutId={id}
+        layoutId={card.id}
         draggable="true"
         onClick={() => {
-          console.log("clicked");
           setOpen(true);
         }}
-        onDragStart={(e) => handleDragStart(e, { title, id, column })}
+        onDragStart={(e) => handleDragStart(e, card)}
         className="flex flex-row gap-2 bg-card shadow-sm p-2 border rounded-lg text-card-foreground cursor-grab active:cursor-grabbing"
       >
         <div className="flex-shrink-0">
           <GripVertical color="#737373" size={24} />
         </div>
-        <p className="flex-1 text-sm lg:text-lg truncate">{title}</p>
+        <p className="flex-1 text-sm lg:text-lg truncate">{card.title}</p>
       </motion.div>
     </>
   );
@@ -380,21 +568,36 @@ type KanbanAddCardProps = {
 const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
   const [adding, setAdding] = useState(false);
   const [text, setText] = useState("");
+  const [pricing, setPricing] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<kanbanCategory>("Kitchen"); // Default category
+  const getUser = useQuery({
+    queryKey: ["user"],
+    queryFn: getCurrentUserDocumentDetails,
+  });
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!text.trim().length) return;
 
+    const priceValue = parseFloat(pricing);
+    if (isNaN(priceValue)) {
+      toast("Please enter a valid price.");
+      return;
+    }
+
     const newCard = {
       column,
       title: text.trim(),
+      price: parseFloat(pricing) || 0, // Convert pricing to a number
       category: selectedCategory, // Use the selected category
       id: Math.random().toString(),
-      uid: auth.currentUser?.uid || "",
-      displayName: auth.currentUser?.displayName || "",
-      email: auth.currentUser?.email || "",
+      uid: getUser.data?.uid || "",
+      displayName: getUser.data?.firstName || "",
+      email: getUser.data?.email || "",
+      lastModifiedUid: getUser.data?.uid || "",
+      lastModifiedDisplayName: getUser.data?.firstName || "",
+      lastModifiedEmail: getUser.data?.email || "",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -402,6 +605,8 @@ const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
     setCards((pv) => [...pv, newCard]);
 
     setAdding(false);
+    setText("");
+    setPricing("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -423,6 +628,15 @@ const KanbanAddCard = ({ column, setCards }: KanbanAddCardProps) => {
             autoFocus
             placeholder="Add new item..."
             className="rounded w-full"
+          />
+          <Input
+            type="number"
+            min="0"
+            step="10"
+            value={pricing}
+            onChange={(e) => setPricing(e.target.value)}
+            placeholder="Pricing"
+            className="mt-2 rounded w-full"
           />
           <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as kanbanCategory)}>
             <SelectTrigger className="mt-2 w-full">

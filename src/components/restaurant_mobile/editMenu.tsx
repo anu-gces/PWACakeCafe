@@ -164,9 +164,14 @@ export function editMenu() {
         </div>
       </div>
       <div className="gap-0 grid grid-cols-1">
+        {/* filter will disregard category and show it all */}
+        {search !== "" && (
+          <p className="mb-2 ml-4 text-gray-500 text-xs italic">Showing results across all categories</p>
+        )}
+
         {foods
-          .filter(
-            (food) => food.foodCategory === category && food.foodName.toLowerCase().includes(search.toLowerCase())
+          .filter((food) =>
+            search === "" ? food.foodCategory === category : food.foodName.toLowerCase().includes(search.toLowerCase())
           )
           .sort((a, b) => a.foodName.localeCompare(b.foodName)) // Sort alphabetically by foodName
           .map((food) => (

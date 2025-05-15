@@ -291,7 +291,7 @@ export function Calendar() {
           </div>
         )}
 
-        <div className="bg-gradient-to-t from-card via-card to-transparent h-full">
+        <div className="h-full">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin]}
