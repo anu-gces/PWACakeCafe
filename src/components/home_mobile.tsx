@@ -88,6 +88,7 @@ export function Home() {
     mutationFn: doSignOut,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: ["userAdditionalInfo"] });
       navigate({ to: "/" });
       toast("Logged out successfully!");
     },
