@@ -9,7 +9,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { doSignOut } from "@/firebase/auth";
-import { getCurrentUserDocumentDetails } from "@/firebase/firestore";
+import { getCurrentUserDetails, getCurrentUserDocumentDetails } from "@/firebase/firestore";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import {
@@ -68,7 +68,16 @@ export function Home() {
     error,
   } = useQuery({
     queryKey: ["user"],
+    queryFn: getCurrentUserDetails,
+    refetchOnMount: true,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
+  });
+
+  const { data: userAdditionalInfo } = useQuery({
+    queryKey: ["userAdditionalInfo"],
     queryFn: getCurrentUserDocumentDetails,
+    refetchOnMount: true,
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: Number.POSITIVE_INFINITY,
   });
@@ -126,16 +135,19 @@ export function Home() {
                   className="flex items-center gap-4 bg-background hover:bg-muted shadow-sm px-2 py-2 border border-border rounded-xl w-full text-left transition"
                 >
                   <Avatar className="ring-2 ring-muted w-11 h-11">
-                    <AvatarImage src={user?.profilePicture || user?.photoURL || fallbackAvatar} alt="User Avatar" />
+                    <AvatarImage
+                      src={userAdditionalInfo?.profilePicture || userAdditionalInfo?.photoURL || fallbackAvatar}
+                      alt="User Avatar"
+                    />
                     <AvatarFallback className="font-medium text-base">
-                      {user?.firstName?.charAt(0).toUpperCase() || "U"}
-                      {user?.lastName?.charAt(0).toUpperCase() || "U"}
+                      {userAdditionalInfo?.firstName?.charAt(0).toUpperCase() || "U"}
+                      {userAdditionalInfo?.lastName?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col justify-center">
                     <span className="text-muted-foreground text-xs tracking-wide">Welcome back,</span>
                     <span className="font-semibold text-foreground text-sm leading-tight">
-                      {user?.firstName || "User"}!
+                      {userAdditionalInfo?.firstName || "User"}!
                     </span>
                   </div>
                 </button>
@@ -156,7 +168,7 @@ export function Home() {
                     <UserIcon className="w-5 h-5" />
                     <span>Profile Settings</span>
                   </Link>
-                  {(user?.role === "admin" || user?.role === "owner") && (
+                  {(userAdditionalInfo?.role === "admin" || userAdditionalInfo?.role === "owner") && (
                     <Link
                       to="/home/employee"
                       className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm"

@@ -34,6 +34,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        cleanupOutdatedCaches: true,
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"], // Precaches Vite build output
         runtimeCaching: [
           {
@@ -71,7 +72,7 @@ export default defineConfig({
           },
           {
             urlPattern: /\/assets\/.*\.(js|css)/, // Vite static assets
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: "static-resources",
               expiration: {

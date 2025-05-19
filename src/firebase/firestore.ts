@@ -32,7 +32,7 @@ import { CardType as KanbanCardType } from "@/components/ui/kanbanBoard";
 
 export const db = initializeFirestore(app, {
   localCache: persistentLocalCache({
-    cacheSizeBytes: 200000000, // Example cache size, adjust as needed
+    cacheSizeBytes: 200000000,
     tabManager: persistentMultipleTabManager(),
   }),
 });

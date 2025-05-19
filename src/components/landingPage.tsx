@@ -99,7 +99,7 @@ export function LandingPage() {
             <LoginForm />
           </motion.div>
         </AnimatePresence>
-        <footer className="bottom-2 left-1/2 absolute text-gray-500 text-xs -translate-x-1/2 transform">
+        <footer className="bottom-2 left-1/2 absolute text-gray-500 text-xs text-nowrap -translate-x-1/2 transform">
           &copy; {new Date().getFullYear()} anuvette. All rights reserved.
         </footer>
       </div>
