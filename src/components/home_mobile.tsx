@@ -147,7 +147,7 @@ export function Home() {
                   <div className="flex flex-col justify-center">
                     <span className="text-muted-foreground text-xs tracking-wide">Welcome back,</span>
                     <span className="font-semibold text-foreground text-sm leading-tight">
-                      {userAdditionalInfo?.firstName || "User"}!
+                      {userAdditionalInfo?.firstName || user?.displayName || "User"}!
                     </span>
                   </div>
                 </button>
