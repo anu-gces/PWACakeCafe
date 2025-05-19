@@ -78,6 +78,8 @@ export function Home() {
     queryKey: ["userAdditionalInfo"],
     queryFn: getCurrentUserDocumentDetails,
     refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: Number.POSITIVE_INFINITY,
   });
@@ -162,7 +164,7 @@ export function Home() {
                 <Separator />
                 <div className="flex flex-col flex-grow justify-center items-start space-y-2">
                   <Link
-                    to="/home/account"
+                    to="/home/settings"
                     className="flex items-center space-x-3 p-3 rounded-md text-muted-foreground hover:text-foreground text-sm"
                   >
                     <UserIcon className="w-5 h-5" />

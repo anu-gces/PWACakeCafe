@@ -188,12 +188,12 @@ export function Overview() {
             <OverviewBarChart data={monthlyRevenue} />
           </CardContent>
         </Card>
+        {/* RecentSales */}
         <Card
           className="order-2 lg:order-2 col-span-full lg:col-span-3 h-full active:scale-[0.995] transition-transform cursor-pointer"
           onClick={() =>
             navigate({
-              to: "/home/dashboard",
-              search: { tab: "reports" },
+              to: "/home/billing",
             })
           }
         >
