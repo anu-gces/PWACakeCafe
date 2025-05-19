@@ -8,22 +8,25 @@ export const Route = createFileRoute("/")({
   beforeLoad: async ({}) => {
     const user = await getCurrentUserDetails();
 
-    // If no user is authenticated, do nothing and let them stay
     if (!user) {
       return null;
     }
 
-    // Check if the user's profile is complete
-    const profileComplete = await isUserProfileComplete();
+    try {
+      const profileComplete = await isUserProfileComplete();
 
-    if (profileComplete) {
-      // If authenticated and profile is complete, navigate to /home
-      throw redirect({
-        to: "/home/editMenu",
-        search: { category: "appetizers" },
-      });
-    } else {
-      // If authenticated but profile is not complete, navigate to /profileComplete
+      if (profileComplete) {
+        throw redirect({
+          to: "/home/editMenu",
+          search: { category: "appetizers" },
+        });
+      } else {
+        throw redirect({
+          to: "/profileComplete",
+        });
+      }
+    } catch (error) {
+      // If user doc not found or any error, redirect to profile complete
       throw redirect({
         to: "/profileComplete",
       });

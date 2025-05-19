@@ -391,7 +391,6 @@ export const columns: ColumnDef<DocumentData, unknown>[] = [
               </DrawerHeader>
               <DrawerFooter>
                 <Button
-                  className="ml-2"
                   onClick={() => {
                     deleteMutation.mutate(user.uid);
                   }}

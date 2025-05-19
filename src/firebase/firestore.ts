@@ -85,7 +85,9 @@ export async function isUserProfileComplete(): Promise<boolean> {
       const userData = userDoc.data();
       return userData ? userData.isProfileComplete : false;
     } else {
-      throw new Error("User document does not exist");
+      // Create the user document if it does not exist
+      await enterUserDocument(user.uid, user.email!, user.photoURL);
+      return false; // Profile is not complete yet
     }
   } else {
     throw new Error("No user is currently logged in");

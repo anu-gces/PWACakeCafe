@@ -253,6 +253,7 @@ function CreateOrderDrawer({ addToCart, setAddToCart }: BillProps) {
         <DrawerFooter>
           <DrawerClose asChild>
             <Button
+              disabled={enterOrderMutation.isPending}
               onClick={() => {
                 enterOrderMutation.mutate(addToCart);
               }}

@@ -22,6 +22,7 @@ import { CalendarClock, CalendarDays, ChevronLeft, ChevronRight, Plus, RotateCcw
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import FloatingActionMenu from "./ui/floating-action-menu";
+import { setHours, setMinutes, setSeconds } from "date-fns";
 
 export type calendarEventProps = {
   id: string;
@@ -32,6 +33,14 @@ export type calendarEventProps = {
   startTime?: string;
   endTime?: string;
 };
+
+function combineDateAndTime(date: Date, time: string): Date {
+  const [hours, minutes] = time.split(":").map(Number);
+  let result = setHours(date, hours);
+  result = setMinutes(result, minutes);
+  result = setSeconds(result, 0);
+  return result;
+}
 
 export function Calendar() {
   const [localEvents, setLocalEvents] = useState<calendarEventProps[]>([]);
@@ -51,9 +60,9 @@ export function Calendar() {
     setLocalEvents(calendarEvents || []);
   }, [calendarEvents]);
 
-  // useEffect(() => {
-  //   console.log("Log from useEffect: localEvents has changed", localEvents);
-  // }, [localEvents]);
+  useEffect(() => {
+    console.log("Log from useEffect: localEvents has changed", localEvents);
+  }, [localEvents]);
 
   useLoadingSpinner(isLoading);
 
@@ -91,8 +100,8 @@ export function Calendar() {
       return;
     }
 
-    const startDateTime = startTime ? new Date(`${start.toISOString().split("T")[0]}T${startTime}`) : start;
-    const endDateTime = endTime ? new Date(`${end.toISOString().split("T")[0]}T${endTime}`) : end;
+    const startDateTime = startTime && start ? combineDateAndTime(start, startTime) : start;
+    const endDateTime = endTime && end ? combineDateAndTime(end, endTime) : end;
 
     if (startDateTime > endDateTime) {
       alert("End date and time must be after start date and time");
