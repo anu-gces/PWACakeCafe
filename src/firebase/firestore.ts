@@ -417,10 +417,11 @@ export async function deleteFoodItem(foodIdToDelete: string) {
 export async function createOrderDocument(orderDetails: AddToCart) {
   const auth = getAuth();
   const user = auth.currentUser;
+  const userDoc = await getCurrentUserDocumentDetails();
 
   if (!user) throw new Error("No authenticated user found");
 
-  const processedBy = user.displayName || user.email || "unknown";
+  const processedBy = userDoc?.firstName || user.displayName || user.email || "unknown";
   const receiptId = generateReceiptId(); // e.g., "CAKE-X8F4L9"
   const receiptDate = new Date().toISOString();
 

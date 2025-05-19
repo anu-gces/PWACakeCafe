@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/drawer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { uploadMenuItemImage } from "@/firebase/firebase_storage";
-import { createOrderDocument, enterFoodItem, getCurrentUserDocumentDetails, getFoodItems } from "@/firebase/firestore";
+import {
+  createOrderDocument,
+  enterFoodItem,
+  getCurrentUserDetails,
+  getCurrentUserDocumentDetails,
+  getFoodItems,
+} from "@/firebase/firestore";
 import { cn, useLoadingSpinner } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
@@ -293,7 +299,17 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
 
   const { data: user } = useQuery({
     queryKey: ["user"],
+    queryFn: getCurrentUserDetails,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
+  });
+
+  const { data: userAdditionalInfo } = useQuery({
+    queryKey: ["userAdditionalInfo"],
     queryFn: getCurrentUserDocumentDetails,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: Number.POSITIVE_INFINITY,
   });
@@ -379,7 +395,9 @@ function Bill({ addToCart, setAddToCart }: BillProps) {
             </TableRow>
 
             <TableRow>
-              <TableCell className="text-gray-500 text-xs text-left">Processed By: {user?.firstName}</TableCell>
+              <TableCell className="text-gray-500 text-xs text-left">
+                Processed By: {userAdditionalInfo?.firstName || user?.displayName}
+              </TableCell>
               <TableCell className="font-semibold text-right">Total</TableCell>
               <TableCell className="font-bold text-right">Rs.{total.toFixed(2)}</TableCell>
             </TableRow>

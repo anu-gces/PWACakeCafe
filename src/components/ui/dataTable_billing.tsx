@@ -35,6 +35,7 @@ import {
 } from "./drawer";
 import { AddToCart } from "../restaurant_mobile/editMenu";
 import CakeCafeLogo from "@/assets/Logob.png";
+import { format } from "date-fns";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -254,7 +255,7 @@ function ReceiptDrawer({
             <h2 className="mb-4 font-bold text-center">Receipt</h2>
             <div className="mb-4 text-xs text-center">
               <div>ID: {data.receiptId}</div>
-              <div>Date: {data.receiptDate}</div>
+              <div>Date: {format(new Date(data.receiptDate), "yyyy-MM-dd '@' hh:mm a")}</div>
             </div>
             <Table className="w-full table-auto">
               <TableHeader>
